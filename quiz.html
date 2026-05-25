@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAPM Quiz — Lakefield Mews PM Training</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #F0EDE8; color: #1C1917; min-height: 100vh; }
+  .sys { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+  .wrap { max-width: 580px; margin: 0 auto; padding: 24px 16px; }
+  .card { background: #fff; border: 1px solid #D6D0C8; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
+  .btn { border: none; border-radius: 10px; padding: 13px 24px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; width: 100%; }
+  .btn-primary { background: #2563EB; color: #fff; }
+  .btn-primary:hover { background: #1D4ED8; }
+  .btn-outline { background: transparent; color: #57534E; border: 1.5px solid #D6D0C8; }
+  .btn-outline:hover { background: #E8E4DE; }
+  .btn-ghost { background: none; border: none; color: #57534E; font-size: 13px; cursor: pointer; font-family: inherit; padding: 6px 0; }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: system-ui; }
+  .choice { background: #fff; border: 1.5px solid #D6D0C8; border-radius: 12px; padding: 13px 16px; margin-bottom: 9px; cursor: pointer; transition: all 0.15s; display: flex; gap: 12px; align-items: flex-start; }
+  .choice:hover { border-color: #2563EB88; background: #EFF6FF; }
+  .choice.correct { border-color: #16A34A; background: #F0FDF4; }
+  .choice.wrong { border-color: #DC2626; background: #FEF2F2; }
+  .choice.disabled { cursor: not-allowed; opacity: 0.6; }
+  .choice-letter { width: 28px; height: 28px; border-radius: 7px; background: #F1EFE8; color: #2563EB; border: 1.5px solid #2563EB33; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; font-family: system-ui; }
+  .choice.correct .choice-letter { background: #16A34A; color: #fff; border-color: #16A34A; }
+  .choice.wrong .choice-letter { background: #DC2626; color: #fff; border-color: #DC2626; }
+  .progress-bar { height: 5px; background: #E8E4DE; border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+  .phase-tag { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; font-family: system-ui; font-weight: 700; }
+  .feedback-box { border-radius: 10px; padding: 13px 15px; margin-top: 12px; background: #F8F7F4; border: 1px solid #D6D0C8; }
+  .score-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; margin: 0 auto 16px; }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+
+<script>
+// ── Quiz Data ──────────────────────────────────────────────────────────────
+const PHASES = [
+  { id:"assignment", n:1, title:"Assignment & Orientation", color:"#2563EB", pmbok:"Initiating" },
+  { id:"assessment",  n:2, title:"Assessment",              color:"#7C3AED", pmbok:"Planning" },
+  { id:"planning",    n:3, title:"Planning",                color:"#D97706", pmbok:"Planning" },
+  { id:"execution",   n:4, title:"Execution",               color:"#059669", pmbok:"Executing & Monitoring" },
+  { id:"closeout",    n:5, title:"Closeout & Presentation", color:"#D97706", pmbok:"Closing" },
+];
+
+const QUESTIONS = [
+  // ── Phase 1: Assignment & Orientation (Initiating) ─────────────────────
+  {
+    phase: 1,
+    question: "When Marcus called Garius into his office and formally handed him the PM role on the Lakefield Mews Preventive Maintenance Modernization Project, he defined the project's purpose, assigned Garius as project manager, and outlined the expected deliverables. In CAPM terms, this formal authorization is documented in which of the following?",
+    choices: ["The Risk Register","The Communication Plan","The Project Charter","The Work Breakdown Structure"],
+    correct: 2,
+    explanation: "The Project Charter formally authorizes a project and identifies the project manager. Marcus's formal assignment of Garius — along with the defined deliverables and purpose — is exactly what a Project Charter documents. It's one of the first and most important outputs of the Initiating process group.",
+    pmTerm: "Project Charter",
+    phase_name: "Assignment & Orientation"
+  },
+  {
+    phase: 1,
+    question: "Before Garius began any work at Lakefield Mews, Marcus identified key people whose interests would be affected by the project — including Diana Reyes, Jerome Hill, Patricia Owens, and the tenants. In CAPM, what is the process of identifying these individuals called?",
+    choices: ["Risk Identification","Stakeholder Identification","Scope Definition","Resource Planning"],
+    correct: 1,
+    explanation: "Stakeholder Identification is the process of identifying all people or organizations that may affect or be affected by the project. Marcus and Garius needed to know who had a stake in the outcome at Lakefield Mews before any planning could begin. This happens during the Initiating process group.",
+    pmTerm: "Stakeholder Identification",
+    phase_name: "Assignment & Orientation"
+  },
+  {
+    phase: 1,
+    question: "Marcus told Garius: 'What I need from you at the end of 90 days is a clear reduction in reactive work orders, a working preventive maintenance schedule the team actually follows, and documentation showing how we got there.' In CAPM terms, these three expected outcomes are best described as:",
+    choices: ["Milestones","Deliverables","Change Requests","Risk Responses"],
+    correct: 1,
+    explanation: "Deliverables are the specific, measurable outputs a project is expected to produce. Marcus's three requirements — reduced reactive work orders, a working schedule, and documentation — are the project's deliverables. Every PM must clearly understand their deliverables before starting work.",
+    pmTerm: "Deliverables",
+    phase_name: "Assignment & Orientation"
+  },
+
+  // ── Phase 2: Assessment (Planning) ────────────────────────────────────
+  {
+    phase: 2,
+    question: "During the Assessment phase, Garius walked Lakefield Mews, talked to Diana and Jerome, reviewed past work orders, and observed how maintenance was currently being handled. Before drawing any conclusions, he gathered information from multiple sources. This approach of systematically gathering information to understand the current state is most closely associated with which CAPM concept?",
+    choices: ["Change Control","Lessons Learned","Collect Requirements","Risk Identification"],
+    correct: 2,
+    explanation: "Collect Requirements is the process of determining, documenting, and managing stakeholder needs and requirements. Garius's structured information gathering — talking to the team, reviewing records, and observing operations — is how a PM builds the foundation for effective planning. You can't define scope without first collecting requirements.",
+    pmTerm: "Collect Requirements",
+    phase_name: "Assessment"
+  },
+  {
+    phase: 2,
+    question: "While assessing Lakefield Mews, Garius identified several things that could go wrong — vendor delays, team resistance to new schedules, and budget pressure from upper management. He documented these potential issues before they happened. In CAPM, the document used to record identified risks is called:",
+    choices: ["The Issue Log","The Risk Register","The Change Log","The Stakeholder Register"],
+    correct: 1,
+    explanation: "The Risk Register is the document where identified risks, their probability, potential impact, and planned responses are recorded. By identifying risks like vendor delays and team resistance early — during the Assessment phase — Garius was practicing proactive risk management, one of the hallmarks of strong PM leadership.",
+    pmTerm: "Risk Register",
+    phase_name: "Assessment"
+  },
+  {
+    phase: 2,
+    question: "Diana Reyes told Garius something important during the assessment: the team had tried a preventive maintenance schedule before, but it fell apart because nobody followed through. This insight from a previous attempt is an example of which CAPM input?",
+    choices: ["A Change Request","An Issue Log Entry","Lessons Learned","A Milestone Review"],
+    correct: 2,
+    explanation: "Lessons Learned are documented knowledge from previous projects or phases that can improve future performance. Diana's insight about why past efforts failed is exactly the kind of lessons learned information a smart PM uses to avoid repeating the same mistakes. Garius needed to hear that before building his plan.",
+    pmTerm: "Lessons Learned",
+    phase_name: "Assessment"
+  },
+
+  // ── Phase 3: Planning ──────────────────────────────────────────────────
+  {
+    phase: 3,
+    question: "During the Planning phase at Lakefield Mews, Garius broke the project down into specific tasks — creating the inspection checklist, scheduling technician assignments, updating the CMMS system, and reporting to Patricia. He organized these into a structured breakdown of all the work required. In CAPM, this structured decomposition of project work is called:",
+    choices: ["The Project Charter","The Communication Plan","The Work Breakdown Structure","The Risk Register"],
+    correct: 2,
+    explanation: "The Work Breakdown Structure (WBS) is a hierarchical decomposition of all the work required to complete the project. By breaking the Lakefield Mews initiative into specific, manageable tasks, Garius created a WBS — the foundation of effective project planning and the basis for scheduling, budgeting, and resource assignment.",
+    pmTerm: "Work Breakdown Structure",
+    phase_name: "Planning"
+  },
+  {
+    phase: 3,
+    question: "Garius established a plan for how he would communicate with Marcus, Patricia, Diana, Jerome, and the tenants — who would receive what information, how often, and through what channel. In CAPM, this plan is formally called:",
+    choices: ["The Stakeholder Register","The Communication Management Plan","The Issue Log","The Risk Response Plan"],
+    correct: 1,
+    explanation: "The Communication Management Plan defines how project information will be created, distributed, stored, and managed. A PM who doesn't communicate deliberately loses stakeholder trust quickly. Garius's plan to keep Marcus updated weekly, Patricia informed on tenant-impacting work, and the team aligned on schedules is textbook Communication Management.",
+    pmTerm: "Communication Management Plan",
+    phase_name: "Planning"
+  },
+  {
+    phase: 3,
+    question: "Midway through planning, Patricia Owens asked Garius to also handle a full apartment inspection program on top of the preventive maintenance work. This was not part of Marcus's original assignment. In CAPM, when additional work is added to a project beyond its original boundaries, this is called:",
+    choices: ["A Change Request","Resource Constraint","Scope Creep","Schedule Variance"],
+    correct: 2,
+    explanation: "Scope Creep occurs when additional work is added to a project without proper authorization or assessment of impact on schedule, budget, and resources. Patricia's request — while reasonable on the surface — was outside the defined scope of the Lakefield Mews project. A strong PM identifies scope creep early and manages it through the change control process.",
+    pmTerm: "Scope Creep",
+    phase_name: "Planning"
+  },
+
+  // ── Phase 4: Execution ─────────────────────────────────────────────────
+  {
+    phase: 4,
+    question: "During execution at Lakefield Mews, Jerome Hill missed two scheduled maintenance assignments without explanation. Garius documented the issue, had a direct conversation with Jerome, and tracked follow-through. The document Garius used to formally record and track this problem is called:",
+    choices: ["The Risk Register","The Issue Log","The Change Log","The Lessons Learned Register"],
+    correct: 1,
+    explanation: "The Issue Log is used to record and track problems that arise during project execution — things that are already happening, as opposed to risks which are potential future events. Jerome's missed assignments were active issues that required documentation, accountability, and resolution. A PM who doesn't track issues loses control of execution.",
+    pmTerm: "Issue Log",
+    phase_name: "Execution"
+  },
+  {
+    phase: 4,
+    question: "Garius noticed that the preventive maintenance schedule was running two weeks behind the original plan. He compared the planned schedule against actual progress to understand the gap. In CAPM, the difference between planned and actual schedule performance is called:",
+    choices: ["Resource Constraint","Scope Variance","Schedule Variance","Change Request"],
+    correct: 2,
+    explanation: "Schedule Variance measures the difference between planned and actual schedule performance. When Garius realized the work was two weeks behind, he was performing schedule monitoring — a core part of the Monitoring and Controlling process group. Identifying variance early gives a PM time to course correct before it becomes critical.",
+    pmTerm: "Schedule Variance",
+    phase_name: "Execution"
+  },
+  {
+    phase: 4,
+    question: "A vendor supplying parts for the HVAC preventive maintenance delayed delivery by three weeks, threatening the project timeline. Garius had already identified vendor delays as a potential risk during the Assessment phase. His pre-planned response to this risk is called a:",
+    choices: ["Change Request","Risk Response","Issue Log Entry","Milestone Review"],
+    correct: 1,
+    explanation: "A Risk Response is a pre-planned action taken when an identified risk occurs. Because Garius identified vendor delays in his Risk Register during Assessment, he was prepared to act when it happened — rather than scrambling to react. This is the value of proactive risk management: turning surprises into managed events.",
+    pmTerm: "Risk Response",
+    phase_name: "Execution"
+  },
+
+  // ── Phase 5: Closeout & Presentation ──────────────────────────────────
+  {
+    phase: 5,
+    question: "At the end of the 90-day project, Garius presented his results to Marcus and Patricia, formally handed over the completed preventive maintenance schedule, and submitted his documentation package. This formal process of completing and transferring project deliverables to the appropriate parties is part of which CAPM process group?",
+    choices: ["Planning","Initiating","Executing","Closing"],
+    correct: 3,
+    explanation: "The Closing process group involves formally completing the project, transferring deliverables, and obtaining final acceptance from stakeholders. Garius's presentation to Marcus and Patricia, along with the handover of the schedule and documentation, are the hallmarks of professional project closure. How a PM finishes is just as important as how they start.",
+    pmTerm: "Closing Process Group",
+    phase_name: "Closeout & Presentation"
+  },
+  {
+    phase: 5,
+    question: "After completing the Lakefield Mews project, Garius documented what went well, what didn't, and what he would do differently — including insights about team dynamics, vendor management, and stakeholder communication. In CAPM, this documentation is formally called:",
+    choices: ["The Project Charter","The Risk Register","Lessons Learned","The Communication Plan"],
+    correct: 2,
+    explanation: "Lessons Learned documentation captures knowledge gained during a project that can improve future projects. Garius's honest reflection on his successes and failures at Lakefield Mews — the team dynamics with Diana, the vendor delay he handled, his communication with Patricia — is exactly what makes a PM better on the next project. And the one after that.",
+    pmTerm: "Lessons Learned",
+    phase_name: "Closeout & Presentation"
+  },
+  {
+    phase: 5,
+    question: "Throughout the Lakefield Mews project, Garius was responsible for the outcome — regardless of vendor delays, team challenges, or budget pressure. Marcus made this clear from day one. In CAPM terms, the person assigned authority and responsibility for managing a project to achieve its objectives is called:",
+    choices: ["The Project Sponsor","The Project Manager","The Stakeholder","The Functional Manager"],
+    correct: 1,
+    explanation: "The Project Manager is the person assigned by the performing organization to lead the team and achieve project objectives. From the moment Marcus handed Garius the assignment at Lakefield Mews, Garius became the PM — fully responsible for the outcome. That responsibility doesn't transfer when things get hard. It's the definition of the role.",
+    pmTerm: "Project Manager",
+    phase_name: "Closeout & Presentation"
+  },
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let state = {
+  screen: 'splash', // splash | quiz | result
+  current: 0,
+  answers: [],
+  selected: null,
+  answered: false,
+  score: 0,
+};
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById('app');
+  if (state.screen === 'splash') app.innerHTML = splashHTML();
+  else if (state.screen === 'quiz') app.innerHTML = quizHTML();
+  else if (state.screen === 'result') app.innerHTML = resultHTML();
+  bindEvents();
+}
+
+function splashHTML() {
+  return `
+    <div style="text-align:center;margin-bottom:28px;padding-top:20px">
+      <div style="font-size:9px;letter-spacing:0.4em;color:#A8A29E;text-transform:uppercase;margin-bottom:12px" class="sys">CAPM Exam Prep · Lakefield Mews</div>
+      <div style="font-size:10px;letter-spacing:0.2em;color:#57534E;text-transform:uppercase;margin-bottom:6px" class="sys">Preventive Maintenance Modernization Project</div>
+      <h1 style="font-size:30px;font-weight:900;color:#1C1917;margin:0 0 6px;line-height:1.1;letter-spacing:-0.02em">CAPM Quiz<br><span style="color:#2563EB">Garius Edmond</span></h1>
+      <div style="width:24px;height:2px;background:#2563EB;margin:14px auto;border-radius:2px"></div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <p style="color:#57534E;font-size:13px;line-height:1.85;margin:0" class="sys">
+        You've led the Preventive Maintenance Modernization Project at Lakefield Mews from assignment to closeout. Now it's time to connect what you experienced to the formal CAPM framework.<br><br>
+        Every question in this quiz is tied directly to a moment from your simulation. The answers aren't abstract — they live in decisions you already made at Lakefield Mews.
+      </p>
+    </div>
+    <div class="card" style="margin-bottom:14px;background:#FFFBEB;border-color:#FDE68A">
+      <div style="font-size:10px;color:#D97706;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:8px" class="sys">Before You Begin</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${['Read each question carefully — the difference between choices is in the details','Connect each question back to what happened at Lakefield Mews','Focus on understanding, not just the score','This mirrors the actual CAPM exam format'].map(t=>`<div style="display:flex;gap:8px;align-items:flex-start"><span style="color:#D97706;flex-shrink:0">→</span><span style="color:#78350F;font-size:12px;line-height:1.5" class="sys">${t}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-size:11px;color:#A8A29E;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px" class="sys">Quiz Details</div>
+          <div style="font-size:13px;color:#1C1917;font-weight:600" class="sys">${QUESTIONS.length} Questions · All 5 Phases · CAPM Format</div>
+        </div>
+        <div style="font-size:11px;color:#2563EB;background:#EFF6FF;padding:4px 10px;border-radius:8px;border:1px solid #BFDBFE;font-weight:700" class="sys">🏆 Pass at 80%+</div>
+      </div>
+    </div>
+    <button class="btn btn-primary sys" onclick="startQuiz()">Begin CAPM Quiz →</button>
+  `;
+}
+
+function quizHTML() {
+  const q = QUESTIONS[state.current];
+  const ph = PHASES[q.phase - 1];
+  const pct = Math.round(((state.current) / QUESTIONS.length) * 100);
+
+  return `
+    <!-- Progress -->
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div style="font-size:13px;color:${ph.color};font-weight:800" class="sys">${ph.title}</div>
+          <div style="font-size:10px;color:#A8A29E" class="sys">${ph.pmbok} · Question ${state.current + 1} of ${QUESTIONS.length}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:#A8A29E" class="sys">Score</div>
+          <div style="font-size:14px;color:${ph.color};font-weight:900" class="sys">${state.score}/${state.current}</div>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${pct}%;background:${ph.color}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:3px">
+        ${PHASES.map(p => {
+          const done = state.current > 0 && QUESTIONS.slice(0, state.current).some(qq => qq.phase === p.n);
+          const active = q.phase === p.n;
+          return `<div style="font-size:7px;color:${active?p.color:done?p.color+'99':'#CEC8BF'};font-weight:${active?700:400}" class="sys">${p.id.charAt(0).toUpperCase()+p.id.slice(1,4)}</div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- Question -->
+    <div class="card" style="margin-bottom:14px;border-left:4px solid ${ph.color}">
+      <div style="font-size:9px;color:${ph.color};letter-spacing:0.2em;text-transform:uppercase;margin-bottom:8px;font-weight:700" class="sys">Question ${state.current + 1}</div>
+      <p style="color:#1C1917;font-size:14px;line-height:1.75;margin:0;font-weight:600">${q.question}</p>
+    </div>
+
+    <!-- Choices -->
+    <div style="margin-bottom:14px">
+      ${['A','B','C','D'].map((letter, i) => {
+        let cls = 'choice';
+        let letterStyle = '';
+        if (state.answered) {
+          if (i === q.correct) cls += ' correct';
+          else if (i === state.selected && i !== q.correct) cls += ' wrong';
+          else cls += ' disabled';
+        }
+        return `
+          <div class="${cls}" onclick="${!state.answered ? `selectAnswer(${i})` : ''}">
+            <div class="choice-letter sys">${letter}</div>
+            <div style="color:#1C1917;font-size:13px;line-height:1.5;font-weight:500;padding-top:1px" class="sys">${q.choices[i]}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <!-- Feedback -->
+    ${state.answered ? `
+      <div class="feedback-box" style="background:#F8F7F4;border:1px solid #D6D0C8">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:11px;font-weight:700;color:${state.selected === q.correct ? '#16A34A' : '#B45309'};text-transform:uppercase;letter-spacing:0.1em" class="sys">
+            ${state.selected === q.correct ? '✓ Correct' : '✗ Incorrect'}
+          </div>
+          <span class="pill sys" style="background:${ph.color}15;color:${ph.color};border:1px solid ${ph.color}33">${q.pmTerm}</span>
+        </div>
+        <p style="color:#1C1917;font-size:13px;line-height:1.75;margin:0" class="sys">${q.explanation}</p>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-primary sys" onclick="nextQuestion()">${state.current < QUESTIONS.length - 1 ? 'Next Question →' : 'See My Results →'}</button>
+      </div>
+    ` : `
+      <div style="text-align:center;padding:8px 0">
+        <p style="color:#A8A29E;font-size:12px" class="sys">Select an answer above</p>
+      </div>
+    `}
+  `;
+}
+
+function resultHTML() {
+  const pct = Math.round((state.score / QUESTIONS.length) * 100);
+  const passed = pct >= 80;
+  const color = pct >= 80 ? '#16A34A' : pct >= 60 ? '#D97706' : '#DC2626';
+  const label = pct >= 90 ? 'Outstanding' : pct >= 80 ? 'Passed' : pct >= 60 ? 'Almost There' : 'Keep Studying';
+  const message = pct >= 90
+    ? "Garius, that's an exceptional score. You didn't just memorize terms — you connected them to real decisions at Lakefield Mews. That's exactly how the CAPM exam rewards you. You're ready."
+    : pct >= 80
+    ? "Garius, you passed. Your time leading the Lakefield Mews project is paying off — the concepts are connecting to your experience. A few more runs and you'll be consistently in the 90s."
+    : pct >= 60
+    ? "Garius, you're close. The concepts are starting to connect but a few areas need more attention. Review the questions you missed and connect them back to what happened at Lakefield Mews. Run it again."
+    : "Garius, the foundation is there — you just need more repetition. Go back through the simulation, pay attention to the PM terms in the Coach's Notes, then come back to this quiz. Every run builds more context.";
+
+  // Phase breakdown
+  const phaseScores = PHASES.map(ph => {
+    const phQs = QUESTIONS.filter(q => q.phase === ph.n);
+    const phCorrect = phQs.filter((q, i) => {
+      const qIdx = QUESTIONS.indexOf(q);
+      return state.answers[qIdx] === q.correct;
+    }).length;
+    return { ...ph, correct: phCorrect, total: phQs.length };
+  });
+
+  return `
+    <div style="text-align:center;margin-bottom:20px;padding-top:16px">
+      <div style="font-size:10px;color:${color};letter-spacing:0.3em;text-transform:uppercase;margin-bottom:8px;font-weight:700" class="sys">Quiz Complete</div>
+      <div class="score-circle" style="background:${color}15;border:3px solid ${color}">
+        <div style="font-size:24px;font-weight:900;color:${color};line-height:1" class="sys">${pct}%</div>
+        <div style="font-size:9px;color:${color};font-weight:700;text-transform:uppercase;letter-spacing:0.05em" class="sys">${label}</div>
+      </div>
+      <h2 style="font-size:20px;font-weight:900;color:#1C1917;margin:0 0 4px;line-height:1.2">${state.score} of ${QUESTIONS.length} correct</h2>
+      <div style="font-size:11px;color:#A8A29E" class="sys">Garius Edmond · Lakefield Mews CAPM Quiz</div>
+    </div>
+
+    ${passed ? `
+    <div class="card" style="margin-bottom:14px;background:#FFFBEB;border:2px solid #FDE68A;text-align:center">
+      <div style="font-size:28px;margin-bottom:8px">🏆</div>
+      <div style="font-size:11px;color:#D97706;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:4px" class="sys">CAPM Quiz — Passed</div>
+      <div style="font-size:14px;font-weight:700;color:#78350F" class="sys">Garius Edmond · ${pct}% · ${new Date().toLocaleDateString()}</div>
+    </div>
+    ` : ''}
+
+    <div class="card" style="margin-bottom:14px;background:#F0FDF4;border-color:#BBF7D0">
+      <div style="font-size:10px;color:${passed?'#16A34A':'#DC2626'};font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px" class="sys">Your Coach Says</div>
+      <p style="color:#14532D;font-size:13px;line-height:1.75;margin:0" class="sys">${message}</p>
+    </div>
+
+    <!-- Phase breakdown -->
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:11px;color:#A8A29E;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px" class="sys">Performance by Phase</div>
+      ${phaseScores.map(ph => {
+        const phPct = Math.round((ph.correct/ph.total)*100);
+        const phColor = phPct >= 80 ? '#16A34A' : phPct >= 60 ? '#D97706' : '#DC2626';
+        return `
+          <div style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <div style="font-size:12px;color:#1C1917;font-weight:700" class="sys">${ph.title}</div>
+              <div style="font-size:11px;color:${phColor};font-weight:700" class="sys">${ph.correct}/${ph.total} · ${phPct}%</div>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:${phPct}%;background:${phColor}"></div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <!-- CAPM Terms encountered -->
+    <div class="card" style="margin-bottom:20px">
+      <div style="font-size:11px;color:#A8A29E;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px" class="sys">CAPM Terms Covered</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${QUESTIONS.map((q,i) => {
+          const correct = state.answers[i] === q.correct;
+          const ph = PHASES[q.phase-1];
+          return `<span class="pill sys" style="background:${correct?ph.color+'15':'#F1EFE8'};color:${correct?ph.color:'#A8A29E'};border:1px solid ${correct?ph.color+'33':'#E8E4DE'}">${q.pmTerm}</span>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <button class="btn btn-primary sys" onclick="retakeQuiz()" style="margin-bottom:10px">Take It Again →</button>
+    <button class="btn btn-outline sys" onclick="goHome()">← Back to Start</button>
+  `;
+}
+
+// ── Event handlers ─────────────────────────────────────────────────────────
+function bindEvents() {}
+
+function startQuiz() {
+  state = { screen:'quiz', current:0, answers:[], selected:null, answered:false, score:0 };
+  render();
+}
+
+function selectAnswer(idx) {
+  if (state.answered) return;
+  const q = QUESTIONS[state.current];
+  state.selected = idx;
+  state.answered = true;
+  state.answers[state.current] = idx;
+  if (idx === q.correct) state.score++;
+  render();
+}
+
+function nextQuestion() {
+  if (state.current < QUESTIONS.length - 1) {
+    state.current++;
+    state.selected = null;
+    state.answered = false;
+    render();
+  } else {
+    state.screen = 'result';
+    render();
+  }
+}
+
+function retakeQuiz() {
+  state = { screen:'quiz', current:0, answers:[], selected:null, answered:false, score:0 };
+  render();
+}
+
+function goHome() {
+  state = { screen:'splash', current:0, answers:[], selected:null, answered:false, score:0 };
+  render();
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
