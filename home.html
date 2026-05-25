@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garius Edmond — Professional Growth Hub</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, 'Times New Roman', serif; background: #F0EDE8; color: #1C1917; min-height: 100vh; }
+.sys { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+.wrap { max-width: 600px; margin: 0 auto; padding: 24px 16px 48px; }
+.card { background: #fff; border: 1px solid #D6D0C8; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
+.section-label { font-size: 10px; color: #A8A29E; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 10px; font-family: system-ui; font-weight: 700; padding: 0 2px; }
+.tool-card { background: #fff; border: 1px solid #D6D0C8; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start; text-decoration: none; color: inherit; transition: all 0.15s; cursor: pointer; }
+.tool-card:hover { border-color: #2563EB88; background: #F8FBFF; transform: translateY(-1px); }
+.tool-card.disabled { opacity: 0.5; cursor: default; }
+.tool-card.disabled:hover { border-color: #D6D0C8; background: #fff; transform: none; }
+.tool-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
+.pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; font-family: system-ui; }
+.level-bar { display: flex; gap: 3px; margin-bottom: 16px; }
+.level-seg { flex: 1; height: 6px; border-radius: 3px; }
+.milestone-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F0EDE8; }
+.milestone-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; font-weight: 700; font-family: system-ui; }
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.stat-box { background: #fff; border: 1px solid #D6D0C8; border-radius: 10px; padding: 12px; text-align: center; }
+.road-step { display: flex; gap: 10px; align-items: center; padding: 8px 0; }
+.road-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; font-family: system-ui; }
+@media (max-width: 480px) {
+  .stat-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .stat-box { padding: 10px 8px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="card" style="text-align:center;margin-bottom:20px;padding:28px 20px">
+    <div class="pill sys" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;margin-bottom:14px;font-size:9px;letter-spacing:0.2em">PROFESSIONAL GROWTH HUB</div>
+    <h1 style="font-size:28px;font-weight:900;color:#1C1917;margin-bottom:6px;letter-spacing:-0.02em">Garius Edmond</h1>
+    <div style="width:28px;height:2px;background:#2563EB;margin:12px auto;border-radius:2px"></div>
+    <p style="color:#57534E;font-size:13px;line-height:1.85;max-width:420px;margin:0 auto" class="sys">To transform discipline, technical skill, and continuous learning into long-term opportunity and leadership — building a future marked by financial stability, operational excellence, and the ability to positively impact others along the way.</p>
+  </div>
+
+  <!-- Overall Progress -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="section-label">Career Roadmap — Industrial Mechanical / Reliability Track</div>
+    <div class="level-bar">
+      <div class="level-seg" style="background:#16A34A" title="Level 1"></div>
+      <div class="level-seg" style="background:#16A34A55" title="Level 2"></div>
+      <div class="level-seg" style="background:#E8E4DE" title="Level 3"></div>
+      <div class="level-seg" style="background:#E8E4DE" title="Level 4"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+      <span style="font-size:10px;color:#16A34A;font-family:system-ui;font-weight:700">Level 1 ✓</span>
+      <span style="font-size:10px;color:#16A34A;font-family:system-ui;font-weight:700">Level 2 →</span>
+      <span style="font-size:10px;color:#A8A29E;font-family:system-ui">Level 3</span>
+      <span style="font-size:10px;color:#A8A29E;font-family:system-ui">Level 4</span>
+    </div>
+
+    <!-- Road steps -->
+    <div class="road-step">
+      <div class="road-num" style="background:#F0FDF4;color:#16A34A;border:1.5px solid #BBF7D0">1</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#16A34A;font-family:system-ui">Stabilize ✓</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Industrial Mechanical Technician · $62K–$75K</div>
+      </div>
+      <span class="pill sys" style="background:#F0FDF4;color:#16A34A;border:1px solid #BBF7D0">Complete</span>
+    </div>
+    <div class="road-step">
+      <div class="road-num" style="background:#EFF6FF;color:#2563EB;border:1.5px solid #BFDBFE">2</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#2563EB;font-family:system-ui">Think Reliability →</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Maintenance Technician · $72K–$85K</div>
+      </div>
+      <span class="pill sys" style="background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE">In Progress</span>
+    </div>
+    <div class="road-step" style="opacity:0.5">
+      <div class="road-num" style="background:#F5F5F4;color:#A8A29E;border:1.5px solid #E8E4DE">3</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#57534E;font-family:system-ui">Get CMRT</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Reliability Technician · $82K–$95K</div>
+      </div>
+      <span class="pill sys" style="background:#F5F5F4;color:#A8A29E;border:1px solid #E8E4DE">Upcoming</span>
+    </div>
+    <div class="road-step" style="opacity:0.5">
+      <div class="road-num" style="background:#F5F5F4;color:#A8A29E;border:1.5px solid #E8E4DE">4</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#57534E;font-family:system-ui">Lead</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Senior Reliability Tech → Lead · $90K–$110K+</div>
+      </div>
+      <span class="pill sys" style="background:#F5F5F4;color:#A8A29E;border:1px solid #E8E4DE">Future</span>
+    </div>
+  </div>
+
+  <!-- Credentials -->
+  <div class="section-label">Credentials & Certifications</div>
+  <div class="card" style="margin-bottom:20px">
+    <div class="milestone-row">
+      <div class="milestone-dot" style="background:#F0FDF4;color:#16A34A;border:1.5px solid #BBF7D0">✓</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1C1917;font-family:system-ui">EPA 608 Universal</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Completed · HVAC Refrigerant Certification</div>
+      </div>
+    </div>
+    <div class="milestone-row">
+      <div class="milestone-dot" style="background:#F0FDF4;color:#16A34A;border:1.5px solid #BBF7D0">✓</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1C1917;font-family:system-ui">OSHA 10</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Completed · Workplace Safety</div>
+      </div>
+    </div>
+    <div class="milestone-row">
+      <div class="milestone-dot" style="background:#F0FDF4;color:#16A34A;border:1.5px solid #BBF7D0">✓</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1C1917;font-family:system-ui">Zone II Certification — Forklift</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Completed · Level 1 Priority</div>
+      </div>
+    </div>
+    <div class="milestone-row">
+      <div class="milestone-dot" style="background:#FFFBEB;color:#D97706;border:1.5px solid #FDE68A">→</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#D97706;font-family:system-ui">CMMS Certification</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">In Progress · Computerized Maintenance Management</div>
+      </div>
+    </div>
+    <div class="milestone-row" style="opacity:0.5">
+      <div class="milestone-dot" style="background:#F5F5F4;color:#A8A29E;border:1.5px solid #E8E4DE">○</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#57534E;font-family:system-ui">CMRT — Certified Maintenance & Reliability Technician</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Level 3 Target · SMRP · $82K–$95K market</div>
+      </div>
+    </div>
+    <div class="milestone-row" style="opacity:0.5;border-bottom:none">
+      <div class="milestone-dot" style="background:#F5F5F4;color:#A8A29E;border:1.5px solid #E8E4DE">○</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#57534E;font-family:system-ui">CAPM / PMP</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Level 4 Target · Project Management Professional</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Training Tools -->
+  <div class="section-label">PM Training Tools</div>
+
+  <a class="tool-card" href="./sim.html">
+    <div class="tool-icon" style="background:#EFF6FF;border:1px solid #BFDBFE">🏢</div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:700;color:#1C1917;margin-bottom:2px;font-family:system-ui">PM Simulation</div>
+      <div style="font-size:12px;color:#57534E;font-family:system-ui;margin-bottom:6px">Preventive Maintenance Modernization Project · Lakefield Mews · 5 Phases</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <span class="pill sys" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE">5 Phases</span>
+        <span class="pill sys" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE">CAPM Aligned</span>
+        <span class="pill sys" style="background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0">Active</span>
+      </div>
+    </div>
+    <div style="color:#A8A29E;font-size:18px;margin-top:4px">›</div>
+  </a>
+
+  <a class="tool-card" href="./quiz.html">
+    <div class="tool-icon" style="background:#F5F3FF;border:1px solid #DDD6FE">📝</div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:700;color:#1C1917;margin-bottom:2px;font-family:system-ui">CAPM Quiz</div>
+      <div style="font-size:12px;color:#57534E;font-family:system-ui;margin-bottom:6px">15 questions tied to your Lakefield Mews experience · CAPM exam format</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <span class="pill sys" style="background:#F5F3FF;color:#6D28D9;border:1px solid #DDD6FE">15 Questions</span>
+        <span class="pill sys" style="background:#F5F3FF;color:#6D28D9;border:1px solid #DDD6FE">Pass at 80%</span>
+        <span class="pill sys" style="background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0">Active</span>
+      </div>
+    </div>
+    <div style="color:#A8A29E;font-size:18px;margin-top:4px">›</div>
+  </a>
+
+  <div class="tool-card disabled">
+    <div class="tool-icon" style="background:#F5F5F4;border:1px solid #E8E4DE">🏫</div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:700;color:#57534E;margin-bottom:2px;font-family:system-ui">Classroom of the Future</div>
+      <div style="font-size:12px;color:#A8A29E;font-family:system-ui;margin-bottom:6px">Research & Discovery Simulation · Version 2</div>
+      <div style="display:flex;gap:5px">
+        <span class="pill sys" style="background:#F5F5F4;color:#A8A29E;border:1px solid #E8E4DE">Coming Soon</span>
+      </div>
+    </div>
+    <div style="color:#D6D0C8;font-size:18px;margin-top:4px">›</div>
+  </div>
+
+  <!-- Road to PMP -->
+  <div class="section-label" style="margin-top:6px">Road to PMP</div>
+  <div class="card" style="margin-bottom:14px;background:#FFFBEB;border-color:#FDE68A">
+    <div style="font-size:11px;color:#D97706;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:system-ui">The Path Forward</div>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      ${['Stabilize','Think Reliability','CMRT','CAPM','PMP'].map((s,i)=>`
+        <span style="font-size:11px;font-weight:700;color:${i<2?'#16A34A':i===2?'#D97706':'#A8A29E'};font-family:system-ui">${s}</span>
+        ${i<4?'<span style="color:#D6D0C8;font-size:11px">→</span>':''}
+      `).join('')}
+    </div>
+    <div style="background:#fff;border-radius:10px;border:1px solid #FDE68A;padding:12px">
+      <div style="font-size:11px;color:#D97706;font-weight:700;font-family:system-ui;margin-bottom:8px">CAPM — Currently Studying</div>
+      <div style="font-size:12px;color:#57534E;font-family:system-ui;line-height:1.65">Entry-level PM certification from PMI. Validates project management knowledge before leading full projects. The foundation for everything that follows in the PM track.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px">
+    <div style="font-size:11px;color:#A8A29E;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;font-family:system-ui">Milestones</div>
+    <div class="milestone-row">
+      <div class="milestone-dot" style="background:#F0FDF4;color:#16A34A;border:1.5px solid #BBF7D0;font-size:10px">✓</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1C1917;font-family:system-ui">10+ Years Technical Experience</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">The foundation — hands-on mechanical and HVAC</div>
+      </div>
+    </div>
+    <div class="milestone-row">
+      <div class="milestone-dot" style="background:#EFF6FF;color:#2563EB;border:1.5px solid #BFDBFE;font-size:10px">→</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#2563EB;font-family:system-ui">CAPM Certification</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Currently studying · PMI Certified Associate in PM</div>
+      </div>
+    </div>
+    <div class="milestone-row" style="opacity:0.5">
+      <div class="milestone-dot" style="background:#F5F5F4;color:#A8A29E;border:1.5px solid #E8E4DE;font-size:10px">○</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#57534E;font-family:system-ui">3,600 Hours PM Experience</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">Required for PMP application</div>
+      </div>
+    </div>
+    <div class="milestone-row" style="opacity:0.5;border-bottom:none">
+      <div class="milestone-dot" style="background:#F5F5F4;color:#A8A29E;border:1.5px solid #E8E4DE;font-size:10px">○</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#57534E;font-family:system-ui">PMP Certification</div>
+        <div style="font-size:11px;color:#A8A29E;font-family:system-ui">The ultimate goal · Project Management Professional</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;padding:8px 0">
+    <div style="font-size:10px;color:#A8A29E;font-family:system-ui;letter-spacing:0.1em">GARIUS EDMOND · PROFESSIONAL GROWTH HUB</div>
+    <div style="font-size:10px;color:#D6D0C8;font-family:system-ui;margin-top:4px">Richmond, VA · Industrial Mechanical / Reliability Track</div>
+  </div>
+
+</div>
+</body>
+</html>
