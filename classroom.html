@@ -90,13 +90,13 @@ const CONTENT = {
   // ── PHASE 1: THE MANDATE ─────────────────────────────────────────────────
   assignment: {
     openers: [
-      { scene:"You applied for this job against people with more letters after their name than you — and you got it. Now you're in Superintendent Calhoun's office on your first morning, the offer letter still fresh. He's pouring two coffees, in no hurry.",
+      { scene:"You applied for this job against candidates with more letters after their name than you — and you earned it on merit. Now you're in Superintendent Calhoun's office on your first morning of a 90-day assignment, the signed offer still fresh in your pocket. He rises from behind his desk to meet you, hand extended.",
         speaker:"calhoun",
-        dialogue:"Garius. Sit. I read every application twice, and I picked you — not because of a résumé, but because you talked about people, not gadgets. Here's where I am: I've watched how our kids live now. Fast, visual, thumbs always moving. The world rewired how they pay attention and our classrooms are still running on 1990s assumptions. I want a Classroom of the Future that meets them where they actually are. I'm handing you that. So tell me — before I say another word, what's the first thing you want to understand?",
+        dialogue:"Garius — congratulations, and welcome. I've been looking forward to this. Your interview stood out in a strong field, and I'm genuinely excited to have someone of your caliber leading this. Here's where we are: you've got ninety days. I've watched how our kids live now — fast, visual, thumbs always moving. The world rewired how they pay attention and our classrooms are still running on 1990s assumptions. I want a Classroom of the Future that meets them where they actually are. Define it, pilot it, and bring the board a fundable plan. Before I say another word — what's the first thing you want to understand?",
         pmConcept:"Understanding the sponsor's intent" },
-      { scene:"The hallway outside is lined with framed graduating classes going back decades. You earned your way into this office — beat a stronger-on-paper field for it. Calhoun is already at his desk, sleeves rolled, a legal pad covered in his own handwriting in front of him.",
+      { scene:"The hallway outside is lined with framed graduating classes going back decades. You won this role in a competitive hire — beat a stronger-on-paper field on the strength of your interview. Calhoun comes around the desk with a warm handshake, sleeves rolled, a legal pad covered in his own handwriting waiting on the table.",
         speaker:"calhoun",
-        dialogue:"You know why you're sitting there and not one of the consultants? Because when I asked everyone the same question — 'what's wrong with our classrooms' — they all answered with products. You answered with students. That's the instinct I'm betting on. The vision is simple to say and hard to do: a classroom built around how kids actually engage today. The how is yours to figure out. What do you need from me first?",
+        dialogue:"Garius, congratulations — I told the board I knew exactly who I wanted, and they trusted me. I'm thrilled to be working with you. You've got ninety days on the clock. When I asked every candidate the same question — 'what's wrong with our classrooms' — they all answered with products. You answered with students. That's the instinct I'm betting on. The vision is simple to say and hard to do: a classroom built around how kids actually engage today. Define it, pilot it, bring me a plan I can take to the board. What do you need from me first?",
         pmConcept:"Understanding the sponsor's intent" },
     ],
     slots: [
@@ -552,13 +552,14 @@ function Btn({children,onClick,variant="primary",color=C.blue,disabled=false,ful
   return <button onClick={()=>!disabled&&onClick()} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={s[variant]||s.primary}>{children}</button>;
 }
 
-function ChoiceCard({choice,onSelect,disabled,color}){
+function ChoiceCard({choice,onSelect,disabled,color,selected}){
   const[h,setH]=useState(false);
+  const active = selected || (h && !disabled);
   return(
     <div onClick={()=>!disabled&&onSelect(choice)} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
-      style={{background:h&&!disabled?color+"0a":C.bgCard,border:`1.5px solid ${h&&!disabled?color+"99":C.border}`,borderRadius:12,padding:"12px 14px",cursor:disabled?"not-allowed":"pointer",marginBottom:8,transition:"all 0.15s",opacity:disabled?0.5:1}}>
+      style={{background:selected?color+"15":(active?color+"0a":C.bgCard),border:`${selected?2.5:1.5}px solid ${selected?color:(active?color+"99":C.border)}`,borderRadius:12,padding:"12px 14px",cursor:disabled?"not-allowed":"pointer",marginBottom:8,transition:"all 0.15s",opacity:disabled?0.5:1,boxShadow:selected?`0 2px 8px ${color}22`:"none"}}>
       <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-        <div style={{width:28,height:28,borderRadius:7,background:h&&!disabled?color:"#F1EFE8",color:h&&!disabled?"#fff":color,border:`1.5px solid ${color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:13,flexShrink:0,fontFamily:"system-ui",transition:"all 0.15s"}}>{choice.id}</div>
+        <div style={{width:28,height:28,borderRadius:7,background:active?color:"#F1EFE8",color:active?"#fff":color,border:`1.5px solid ${color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:13,flexShrink:0,fontFamily:"system-ui",transition:"all 0.15s"}}>{selected?"✓":choice.id}</div>
         <div style={{flex:1}}>
           <div style={{color:C.text,fontWeight:700,fontSize:14,marginBottom:2,fontFamily:"system-ui"}}>{choice.label}</div>
           <div style={{color:C.textMid,fontSize:13,lineHeight:1.5,fontFamily:"system-ui"}}>{choice.description}</div>
@@ -699,6 +700,7 @@ function App(){
   const[curDecision,setCurDecision]=useState(null);
   const[lastOutcome,setLastOutcome]=useState(null);
   const[checkpoint,setCheckpoint]=useState(null);
+  const[pendingChoice,setPendingChoice]=useState(null);
   const[phaseDecisions,setPhaseDecisions]=useState([]);
   const[phaseScore,setPhaseScore]=useState(0);
   const[decCount,setDecCount]=useState(0);
@@ -707,9 +709,6 @@ function App(){
   const[error,setError]=useState(null);
   const[log,setLog]=useState([]);
   const[showLog,setShowLog]=useState(false);
-  const[loginInput,setLoginInput]=useState("");
-  const[loginErr,setLoginErr]=useState("");
-
   const phase=PHASES[phaseIdx];
   const maxPS=phase.maxDecisions*2;
 
@@ -730,10 +729,20 @@ function App(){
     setCurDecision(buildDecision(content.slots[0]));
     setPhaseDecisions([]);setPhaseScore(0);setDecCount(0);
     setLastOutcome(null);setCheckpoint(null);setError(null);
+    setPendingChoice(null);
     setScreen("decision");
   };
 
-  const handleChoice=(choice)=>{
+  // Tapping a choice only SELECTS it (sets it pending). Tapping again deselects.
+  // Nothing is committed until the user clicks the Confirm button.
+  const selectChoice=(choice)=>{
+    if(pendingChoice && pendingChoice.id===choice.id) setPendingChoice(null);
+    else setPendingChoice(choice);
+  };
+
+  const commitChoice=()=>{
+    if(!pendingChoice) return;
+    const choice = pendingChoice;
     const newCount=decCount+1;
     const rawScore=cap(choice.weight,2);
     const xpMap={2:20,1:13,0:6};
@@ -742,7 +751,6 @@ function App(){
     const newTotalDS=cap(totalDS+rawScore,TOTAL_MAX_DECISION_SCORE);
     const newMaxDS=maxDS+2;
     const newXP=cap(xp+rawXP,9999);
-    // relationship deltas based on which character reacts + weight
     const newRels={...rels};
     const spk=choice.speaker;
     if(spk&&newRels[spk]!==undefined){ newRels[spk]=cap(newRels[spk]+(rawScore===2?4:rawScore===1?0:-4),100); }
@@ -753,6 +761,7 @@ function App(){
     setXp(newXP);setPhaseScore(newPS);setTotalDS(newTotalDS);setMaxDS(newMaxDS);
     setRels(newRels);setPhaseDecisions(newDec);setLastOutcome(out);
     setDecCount(newCount);setLog(newLog);
+    setPendingChoice(null);
     save({xp:newXP,totalDS:newTotalDS,maxDS:newMaxDS,rels:newRels,log:newLog});
     setScreen("outcome");
   };
@@ -769,6 +778,7 @@ function App(){
       const nextSlot=slotIdx+1;
       setSlotIdx(nextSlot);
       setCurDecision(buildDecision(CONTENT[phase.id].slots[nextSlot]));
+      setPendingChoice(null);
       setScreen("decision");
     }
   };
@@ -871,7 +881,7 @@ function App(){
           <div style={{fontSize:40,marginBottom:8}}>🎓</div>
           <div style={{fontSize:10,color:C.blue,letterSpacing:"0.3em",textTransform:"uppercase",marginBottom:6,fontFamily:"system-ui",fontWeight:700}}>{SCENARIO.district}</div>
           <h2 style={{fontSize:20,fontWeight:900,color:C.text,margin:"0 0 8px",lineHeight:1.2}}>Classroom of the Future<br/>Project</h2>
-          <p style={{color:C.textMid,fontSize:13,lineHeight:1.8,margin:0,fontFamily:"system-ui"}}>Superintendent Calhoun has named you PM of a 90-day initiative. Students engage with the world differently now — and he wants classrooms designed to meet them where they are. Your job: define it, pilot it, and bring the board a plan.</p>
+          <p style={{color:C.textMid,fontSize:13,lineHeight:1.8,margin:0,fontFamily:"system-ui"}}>You earned this role through a competitive hire. Superintendent Calhoun has named you PM of a 90-day initiative. Students engage with the world differently now — and he wants classrooms designed to meet them where they are. Your job: define it, pilot it, and bring the board a plan.</p>
         </div>
         <Card style={{marginBottom:12,background:C.goldLight,border:`1px solid ${C.goldBorder}`}}>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
@@ -912,26 +922,7 @@ function App(){
             </div>
           ))}
         </Card>
-        <Btn full onClick={()=>setScreen("login")} color={C.blue}>I'm Ready →</Btn>
-      </div>
-    </div>
-  );
-
-  // ── LOGIN ──
-  if(screen==="login") return(
-    <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px 16px"}}>
-      <div style={{maxWidth:340,width:"100%",fontFamily:"Georgia,serif"}}>
-        <Btn variant="ghost" onClick={()=>setScreen("overview")}>← Back</Btn>
-        <div style={{margin:"16px 0"}}>
-          <h2 style={{color:C.text,fontSize:24,fontWeight:900,margin:"0 0 6px"}}>Welcome.</h2>
-          <p style={{color:C.textMid,fontSize:13,margin:0,fontFamily:"system-ui"}}>Enter your name to begin your CAPM/PM journey.</p>
-        </div>
-        <input value={loginInput} onChange={e=>{setLoginInput(e.target.value);setLoginErr("");}}
-          onKeyDown={e=>{if(e.key==="Enter"){if(loginInput.trim().toLowerCase()==="garius"){setLoginErr("");setScreen("phaseIntro");}else setLoginErr("This simulation was built for Garius Edmond.");}}}
-          placeholder="Your name..." autoFocus
-          style={{width:"100%",padding:"12px 14px",background:C.bgCard,border:`1.5px solid ${loginErr?C.red:C.border}`,borderRadius:10,color:C.text,fontSize:15,fontFamily:"system-ui",outline:"none",marginBottom:8}}/>
-        {loginErr&&<p style={{color:C.red,fontSize:12,marginBottom:8,fontFamily:"system-ui"}}>{loginErr}</p>}
-        <Btn full onClick={()=>{if(loginInput.trim().toLowerCase()==="garius"){setLoginErr("");setScreen("phaseIntro");}else setLoginErr("This simulation was built for Garius Edmond.");}} color={C.blue}>Enter →</Btn>
+        <Btn full onClick={()=>setScreen("phaseIntro")} color={C.blue}>I'm Ready →</Btn>
       </div>
     </div>
   );
@@ -1003,7 +994,24 @@ function App(){
           <div style={{fontSize:10,color:phase.color,letterSpacing:"0.25em",textTransform:"uppercase",marginBottom:8,fontFamily:"system-ui",fontWeight:800}}>Your Decision</div>
           <p style={{color:C.text,fontSize:16,lineHeight:1.6,margin:0,fontWeight:800,fontFamily:"system-ui"}}>{curDecision.prompt}</p>
         </div>
-        {curDecision.choices.map(c=><ChoiceCard key={c.id} choice={c} onSelect={handleChoice} disabled={false} color={phase.color}/>)}
+        {curDecision.choices.map(c=><ChoiceCard key={c.id} choice={c} onSelect={selectChoice} disabled={false} color={phase.color} selected={pendingChoice?.id===c.id}/>)}
+        {/* Confirm bar: appears once a choice is pending. Tap-to-select, then explicitly confirm. */}
+        <div style={{marginTop:12,padding:"12px 14px",background:pendingChoice?phase.color+"10":C.bgLight,border:`1.5px ${pendingChoice?"solid":"dashed"} ${pendingChoice?phase.color+"66":C.border}`,borderRadius:12,transition:"all 0.2s"}}>
+          {pendingChoice ? (
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+              <div style={{flex:"1 1 auto",minWidth:0}}>
+                <div style={{fontSize:10,color:phase.color,fontWeight:700,fontFamily:"system-ui",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:2}}>You picked</div>
+                <div style={{fontSize:13,color:C.text,fontWeight:700,fontFamily:"system-ui"}}>{pendingChoice.label}</div>
+              </div>
+              <div style={{display:"flex",gap:6,flexShrink:0}}>
+                <Btn small variant="outline" onClick={()=>setPendingChoice(null)}>Change</Btn>
+                <Btn small color={phase.color} onClick={commitChoice}>Confirm →</Btn>
+              </div>
+            </div>
+          ) : (
+            <div style={{textAlign:"center",fontSize:12,color:C.textMuted,fontFamily:"system-ui",fontStyle:"italic"}}>Tap a choice above to select it — you'll confirm before it counts.</div>
+          )}
+        </div>
         {opener.pmConcept&&(
           <div style={{marginTop:8,padding:"6px 12px",background:C.bgLight,borderRadius:8,border:`1px dashed ${C.border}`}}>
             <span style={{fontSize:10,color:C.textMuted,fontFamily:"system-ui"}}>PM concept in focus: </span>
