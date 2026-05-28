@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classroom of the Future — Richmond City Schools | Garius Edmond</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; }
+  body { background: #EDE9E3; -webkit-font-smoothing: antialiased; }
+  #root { width: 100%; min-height: 100vh; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  button { font-family: inherit; }
+  input { font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+// ============================================================================
+//  CLASSROOM OF THE FUTURE — RICHMOND CITY SCHOOLS
+//  Standalone PM training simulation. No external calls. Fully self-contained.
+//  Engine + authored content. Edit the SCENARIO object below to change content.
+// ============================================================================
+
+// ── Design tokens (matched to Lakefield Mews hub) ──────────────────────────
+const C = {
+  bg:"#EDE9E3", bgCard:"#FFFFFF", bgLight:"#E4DFD8", border:"#CEC8BF",
+  text:"#1C1917", textMid:"#57534E", textMuted:"#A8A29E",
+  blue:"#2563EB", blueLight:"#EFF6FF", blueBorder:"#BFDBFE",
+  green:"#16A34A", greenLight:"#F0FDF4", greenBorder:"#BBF7D0",
+  amber:"#D97706", amberLight:"#FFFBEB", amberBorder:"#FDE68A",
+  gold:"#D97706", goldLight:"#FFFBEB", goldBorder:"#FDE68A",
+  red:"#DC2626", redLight:"#FEF2F2", redBorder:"#FECACA",
+  purple:"#7C3AED", purpleLight:"#F5F3FF",
+};
+
+const SAVE_KEY = "classroomfuture_garius_v1";
+
+// ── PHASES (lived project arc — immersion-first, CAPM vocabulary layered lightly) ──
+const PHASES = [
+  { id:"assignment", n:1, title:"The Mandate", short:"Mandate", pmbok:"Getting Started", color:"#2563EB", bg:"#EFF6FF", icon:"🤝", maxDecisions:2, minutes:"~10 min",
+    purpose:"You applied for this role and you earned it. Now Superintendent Calhoun lays out his vision and hands you the reins. Your job in this first sit-down: understand what he really wants, and establish how you'll lead — before the politics start." },
+  { id:"assessment", n:2, title:"Into the Schools", short:"Listen", pmbok:"Understanding the Need", color:"#7C3AED", bg:"#F5F3FF", icon:"👂", maxDecisions:3, minutes:"~12 min",
+    purpose:"Calhoun gave you a vision. The buildings will give you reality. Walk the schools, sit with teachers, principals, and families — and discover that everyone protects their own corner. Your work is to hear what each one actually needs, not just what they say." },
+  { id:"planning", n:3, title:"Building the Plan", short:"Plan", color:"#D97706", bg:"#FFFBEB", pmbok:"Shaping the Work", icon:"🗺️", maxDecisions:3, minutes:"~15 min",
+    purpose:"Turn a vision and a pile of competing needs into something real and fundable. Decide what's in, what's out, what it costs, and who's accountable. This is where a leader earns the trust to actually spend the district's money." },
+  { id:"execution", n:4, title:"The Pilot", short:"Pilot", color:"#059669", bg:"#ECFDF5", pmbok:"Doing the Work & Adapting", icon:"🚀", maxDecisions:4, minutes:"~15 min",
+    purpose:"Theory meets a room full of real students. Launch the pilot, lead the people doing the work, and adapt as the classroom teaches you what the plan couldn't predict. The best leaders learn in motion — adjusting without losing the thread." },
+  { id:"closeout", n:5, title:"Facing the Board", short:"Deliver", color:"#D97706", bg:"#FFFBEB", pmbok:"Delivering & Reflecting", icon:"🏛️", maxDecisions:2, minutes:"~10 min",
+    purpose:"Stand before the school board and account for what you built — the wins, the costs, and the honest lessons. Secure their decision, hand off what you've made, and close it the way a leader closes: with credibility intact." },
+];
+
+const CHARS = {
+  calhoun:  { name:"Dr. Marcus Calhoun", role:"Superintendent",            initials:"MC", color:"#2563EB" },
+  vivian:   { name:"Vivian Brooks",      role:"Veteran Teacher (28 yrs)",  initials:"VB", color:"#059669" },
+  tyler:    { name:"Tyler Nguyen",       role:"Ed-Tech Coordinator",       initials:"TN", color:"#D97706" },
+  rena:     { name:"Rena Okafor",        role:"District Budget Director",  initials:"RO", color:"#7C3AED" },
+  diaz:     { name:"Principal Diaz",     role:"Building Principal",        initials:"PD", color:"#0891B2" },
+  community:{ name:"Students & Parents",  role:"Richmond City Families",    initials:"SP", color:"#DC2626" },
+};
+
+// Scenario meta
+const SCENARIO = {
+  title: "Classroom of the Future",
+  district: "Richmond City Schools",
+  learner: "Garius Edmond",
+  charterMandate: "Design and pilot the Classroom of the Future — a learning environment built around how today's students actually engage — and bring the school board a fundable plan to do it for real.",
+  deliverables: [
+    "A clear, shared definition of what the Classroom of the Future actually is",
+    "A real pilot that proves the idea in an actual Richmond classroom",
+    "A board-ready plan — with honest costs — that earns the decision to scale",
+  ],
+};
+
+// ============================================================================
+//  AUTHORED CONTENT LIBRARY  (immersion-first; CAPM terms used naturally/lightly)
+//  Each phase: opener variants + decision slots with variant pools.
+//  Choice weights: 2=BEST, 1=TRADE-OFF, 0=AVOIDANCE. Engine shuffles positions.
+// ============================================================================
+
+const CONTENT = {
+
+  // ── PHASE 1: THE MANDATE ─────────────────────────────────────────────────
+  assignment: {
+    openers: [
+      { scene:"You applied for this job against people with more letters after their name than you — and you got it. Now you're in Superintendent Calhoun's office on your first morning, the offer letter still fresh. He's pouring two coffees, in no hurry.",
+        speaker:"calhoun",
+        dialogue:"Garius. Sit. I read every application twice, and I picked you — not because of a résumé, but because you talked about people, not gadgets. Here's where I am: I've watched how our kids live now. Fast, visual, thumbs always moving. The world rewired how they pay attention and our classrooms are still running on 1990s assumptions. I want a Classroom of the Future that meets them where they actually are. I'm handing you that. So tell me — before I say another word, what's the first thing you want to understand?",
+        pmConcept:"Understanding the sponsor's intent" },
+      { scene:"The hallway outside is lined with framed graduating classes going back decades. You earned your way into this office — beat a stronger-on-paper field for it. Calhoun is already at his desk, sleeves rolled, a legal pad covered in his own handwriting in front of him.",
+        speaker:"calhoun",
+        dialogue:"You know why you're sitting there and not one of the consultants? Because when I asked everyone the same question — 'what's wrong with our classrooms' — they all answered with products. You answered with students. That's the instinct I'm betting on. The vision is simple to say and hard to do: a classroom built around how kids actually engage today. The how is yours to figure out. What do you need from me first?",
+        pmConcept:"Understanding the sponsor's intent" },
+    ],
+    slots: [
+      // Slot 1 — confidence-building first decision, NO weight-0
+      {
+        prompts:[
+          "Calhoun is giving you the floor. What do you want to understand first?",
+          "He's handed you the vision and asked what you need. Where do you start?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"What 'success' looks like to him", description:"Ask how he'll personally know, a year from now, whether this worked.",
+            outcome:"Calhoun sets his coffee down and actually thinks. He tells you success isn't shiny rooms — it's a kid who was checked out now leaning in, and teachers who'd keep using it after the cameras leave. You've just turned a slogan into something you can actually aim at.",
+            speaker:"calhoun", reaction:"Nobody's asked me that. They ask for budgets and timelines. You asked what winning feels like. That's the right first question.",
+            coaching:"You started by drawing out the sponsor's real definition of success rather than assuming it. In project terms that's clarifying the vision and acceptance criteria up front — the thing everything else gets measured against later.",
+            pmTerm:"sponsor's vision" },
+          { id:"B", weight:1, label:"How much freedom you really have", description:"Clarify the boundaries of your authority before you commit.",
+            outcome:"Calhoun appreciates the directness and spells out your latitude — broad, but the board controls the money. Useful to know. He notes, though, that you reached for the edges of your power before the heart of the work. Authority matters; it just isn't the first thing that wins a room.",
+            speaker:"calhoun", reaction:"Fair question — you've got real room to run. Just don't mistake authority for a plan. Those are different things.",
+            coaching:"Understanding your authority and where decisions actually get made is legitimate early groundwork. The slightly stronger opening move is anchoring on the vision first — authority is the container, but the vision is what fills it.",
+            pmTerm:"decision authority" },
+        ],
+      },
+      // Slot 2 — gentle weight-0 allowed
+      {
+        prompts:[
+          "Calhoun mentions the teachers are 'going to be a mixed bag.' How do you plan to approach them?",
+          "He warns you the buildings won't all welcome this. What's your first move toward the staff?",
+        ],
+        choices:[
+          { id:"A", weight:0, label:"Win them with the vision speech", description:"Plan a district-wide kickoff to inspire everyone and build excitement fast.",
+            outcome:"You pitch a big inspiring rollout assembly. Calhoun half-smiles. He's seen that movie — the speech lands, everyone claps, and three weeks later nothing's changed because you sold before you listened. Excitement without understanding is a sugar high.",
+            speaker:"calhoun", reaction:"I've given that speech, Garius. Twice. The applause is nice. It's not adoption. Go in quieter than that.",
+            coaching:"Leading with persuasion before understanding tends to produce surface-level buy-in that evaporates. The stronger sequence is to listen first and engage stakeholders on their terms before asking them to follow — selling comes after understanding.",
+            pmTerm:"stakeholder engagement" },
+          { id:"B", weight:2, label:"Go listen before you pitch anything", description:"Spend your first weeks in classrooms understanding each group before proposing a thing.",
+            outcome:"You tell Calhoun you won't pitch anything until you've sat in real classrooms and heard what teachers, principals, and families actually deal with. He leans back, satisfied — this is the maturity he gambled on. You've signaled you'll earn buy-in, not demand it.",
+            speaker:"calhoun", reaction:"That's it. Walk the buildings before you change them. The teachers will give a leader who listens a chance they'd never give a slogan.",
+            coaching:"You chose to understand the people and the ground truth before proposing solutions. That listening-first instinct is the foundation of real stakeholder engagement — and it's where the actual requirements of a project come from.",
+            pmTerm:"stakeholder engagement" },
+          { id:"C", weight:1, label:"Start with the eager volunteers", description:"Find the teachers already excited about tech and build from their energy.",
+            outcome:"You decide to rally the enthusiasts first. It gives you quick allies and early momentum — but Calhoun gently notes that the enthusiasts were never your problem. The veterans and the skeptics are where this project lives or dies, and you haven't touched them yet.",
+            speaker:"calhoun", reaction:"The eager ones are easy. They'd do this with or without you. It's Vivian Brooks and her kind you have to reach.",
+            coaching:"Starting with willing allies builds early momentum, but it can create a false sense of consensus. A complete view of your stakeholders includes the resistant and the quiet — often the ones with the most influence over whether change sticks.",
+            pmTerm:"stakeholder analysis" },
+        ],
+      },
+    ],
+  },
+
+  // ── PHASE 2: INTO THE SCHOOLS ────────────────────────────────────────────
+  assessment: {
+    openers: [
+      { scene:"Lincoln Middle School, third period. You wanted to see reality and here it is: one classroom buzzing with kids building something on tablets, and right across the hall, Vivian Brooks teaching the way she has for 28 years — chalk, paper, and a room full of teenagers who are, undeniably, with her. She catches you watching through the door.",
+        speaker:"vivian",
+        dialogue:"You're the new 'future' person. I can always tell — you've got that look, like you're already redecorating my room in your head. Let me save you time: I've outlasted four of these initiatives. Smartboards nobody fixed, tablets in a closet, an app that logged everyone out mid-lesson. My kids' reading scores are fine. So what exactly are you here to fix in my classroom?",
+        pmConcept:"Hearing the real need vs. the stated one" },
+      { scene:"You've spent a week in the buildings and a pattern is emerging: everyone guards their own square of ground. The principal worries about *his* building's numbers. The budget office worries about *its* bottom line. And Vivian Brooks, twenty-eight years in, worries about the one thing that's actually hers — her classroom. She's agreed to ten minutes. It feels like a test.",
+        speaker:"vivian",
+        dialogue:"Calhoun sends someone new every few years with a big word — 'innovation,' 'transformation,' 'future.' And every time, it's my classroom that becomes the experiment, my prep time that disappears into training I never asked for. I'm not against good ideas. I'm against being done *to*. So before you tell me your idea — do you even know what my day actually looks like?",
+        pmConcept:"Hearing the real need vs. the stated one" },
+    ],
+    slots: [
+      {
+        prompts:[
+          "Vivian is your toughest, most respected skeptic — and she's protecting her own turf. How do you handle this?",
+          "The veteran teacher is daring you to prove you see her, not just her classroom. What do you do?",
+        ],
+        choices:[
+          { id:"A", weight:1, label:"Reassure her she's in control", description:"Promise nothing changes in her room without her say-so.",
+            outcome:"You promise she'll stay in control. It's the right sentiment, but it lands as one more pledge from one more new person — and you've made a commitment about her room before you understand what happens in it. She nods, unconvinced. Words are cheap here; she's collecting evidence.",
+            speaker:"vivian", reaction:"Mm-hm. They always say I'm in control. Right up until the cart of tablets shows up uninvited.",
+            coaching:"Reassurance feels kind but rings hollow to a stakeholder who's been burned. The deeper move is to understand her world before promising anything about it — trust with a guarded stakeholder is built through listening, not pledges.",
+            pmTerm:"managing expectations" },
+          { id:"B", weight:2, label:"Ask her to walk you through her day", description:"Set the idea aside entirely and ask what her actual day demands.",
+            outcome:"You close your notebook and just ask about her day. For twenty minutes she tells you everything — the kids who can't focus after lunch, the three who light up only when they make something, the tech that betrayed her in front of a class. You didn't get a skeptic's resistance. You got the truest map of the problem anyone's handed you.",
+            speaker:"vivian", reaction:"Huh. You actually wrote down what I said instead of waiting for your turn to talk. ...Alright. Maybe you're worth ten more minutes.",
+            coaching:"By drawing out her lived reality before pitching anything, you uncovered the real needs beneath the stated complaints. This is the heart of figuring out what a project must actually do — the requirements live in the user's day, not in the vision statement.",
+            pmTerm:"eliciting needs" },
+          { id:"C", weight:0, label:"Cite the research on engagement", description:"Win her over with the data on how modern kids learn.",
+            outcome:"You come armed with studies on attention and engagement. Vivian's expression closes like a door. You've just told a 28-year veteran that a chart understands her classroom better than she does. Whatever ground you might've gained, you've lost — and she'll tell the other veterans about it by lunch.",
+            speaker:"vivian", reaction:"A study. You brought me a study about my own room. Twenty-eight years, and a stranger with a printout knows better. Got it.",
+            coaching:"Leading with data over a veteran's experience signals you value the abstract over the person — corrosive to engagement with a high-influence stakeholder. Evidence has its place, but only after you've honored what the stakeholder already knows.",
+            pmTerm:"stakeholder engagement" },
+        ],
+      },
+      {
+        prompts:[
+          "Principal Diaz pulls you aside — he's worried this project will tank his building's test scores. How do you respond?",
+          "The principal corners you: he only cares whether this helps or hurts *his* school's numbers. What's your move?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"Connect the vision to his numbers", description:"Show how engagement gains could help the very scores he's protecting.",
+            outcome:"Instead of arguing the big picture, you translate it into his world: more engaged kids tend to show up and test better, and you'll measure it so he can prove it. Diaz shifts from gatekeeper to partner — because you spoke to what he actually answers for, not what Calhoun answers for.",
+            speaker:"diaz", reaction:"Okay — now you're talking about my reality, not the superintendent's vision. If you can show me it moves my numbers, my building's open to you.",
+            coaching:"You translated the sponsor's vision into the language of a stakeholder's own concerns — the core skill of the PM as the bridge between a sponsor and the people in the silos. Every stakeholder guards their own zone; your job is to connect the vision to each one.",
+            pmTerm:"stakeholder communication" },
+          { id:"B", weight:0, label:"Remind him it's the superintendent's call", description:"Make clear Calhoun wants this, so his building is participating regardless.",
+            outcome:"You invoke Calhoun's authority. Diaz goes quiet and compliant — and quietly becomes an obstacle. You won the moment and lost the man. He'll follow the letter of the mandate and none of the spirit, and a principal who's secretly rooting against you is a dangerous thing.",
+            speaker:"diaz", reaction:"Of course. Whatever the superintendent wants. We'll... cooperate. [He won't, and you both know it.]",
+            coaching:"Pulling rank may force compliance but it destroys genuine buy-in and creates a hidden resistor. Influence in projects comes from addressing stakeholders' real interests, not from invoking authority over them — authority spends down trust fast.",
+            pmTerm:"influence vs. authority" },
+          { id:"C", weight:1, label:"Promise to keep him posted", description:"Reassure him you'll keep him in the loop as things develop.",
+            outcome:"You promise regular updates. Diaz relaxes slightly — communication is better than silence — but you haven't actually addressed his fear, just promised to narrate it. He's pacified, not partnered. The worry under his question is still sitting there, unanswered.",
+            speaker:"diaz", reaction:"Updates are fine. But you didn't really answer me — is this going to cost me on the state report or not?",
+            coaching:"Committing to communication is good practice, but it isn't a substitute for addressing the underlying concern a stakeholder raised. Engagement means responding to the real interest beneath the question, not only promising to stay in touch.",
+            pmTerm:"stakeholder concerns" },
+        ],
+      },
+      {
+        prompts:[
+          "Two weeks of listening done. The needs you've gathered actually conflict with each other. What now?",
+          "Your notebook is full — and the teachers, the principal, and the budget office all want different things. How do you make sense of it?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"Map the needs and where they clash", description:"Lay out every stakeholder's real need and honestly flag the conflicts.",
+            outcome:"You build a clear map: what each group truly needs, and exactly where those needs collide — Vivian wants control, Tyler wants tools, Rena wants restraint, Diaz wants safe numbers. Seeing the conflicts plainly is what lets you design around them. Calhoun reads it and says it's the first honest picture of his district he's ever gotten.",
+            speaker:"calhoun", reaction:"You didn't smooth it over. You showed me where my own people want opposite things. That's exactly what I need to see before we spend a dollar.",
+            coaching:"Surfacing and documenting conflicting stakeholder needs — rather than pretending they align — is what turns listening into a usable foundation. Naming the tensions is how a leader designs a solution that can actually hold competing interests together.",
+            pmTerm:"requirements analysis" },
+          { id:"B", weight:1, label:"Side with the loudest needs", description:"Prioritize what you heard most often and move forward.",
+            outcome:"You go with the needs that came up most. It's not wrong — but 'loudest' isn't the same as 'most important,' and you may be optimizing for the squeaky wheels while a quiet, critical need from the families goes unaddressed. Frequency is a signal, not the whole truth.",
+            speaker:"rena", reaction:"You're building around what people said most? Volume isn't value, Garius. Some of the quietest needs cost the most to ignore.",
+            coaching:"Prioritizing by how often something was raised is a reasonable start, but it can mistake volume for importance. Genuine analysis weighs each need's impact and the influence of who holds it — not just how loudly it was voiced.",
+            pmTerm:"prioritization" },
+          { id:"C", weight:0, label:"Trust your gut and start designing", description:"You've heard enough — you know what to build. Start drawing it up.",
+            outcome:"You decide you've heard enough and start sketching the solution. It feels decisive. But you've skipped the step where scattered input becomes a shared understanding — and you're now building on your interpretation of two weeks instead of an agreed picture. When stakeholders see it, half won't recognize their own input in it.",
+            speaker:"vivian", reaction:"So all that talking — you took what *you* wanted from it and ran. That's not listening, hon. That's auditioning us.",
+            coaching:"Jumping from raw input straight to a solution skips the analysis that turns listening into shared understanding. Without it, you build on assumptions, and stakeholders won't recognize their needs in the result — eroding the trust you spent two weeks earning.",
+            pmTerm:"shared understanding" },
+        ],
+      },
+    ],
+  },
+
+  // ── PHASE 3: BUILDING THE PLAN ───────────────────────────────────────────
+  planning: {
+    openers: [
+      { scene:"Rena Okafor's office is all spreadsheets and no small talk. She's the one person in the district who can kill this project with a single column of numbers, and she knows it. She doesn't look up from her screen as you sit.",
+        speaker:"rena",
+        dialogue:"Let's not waste each other's time. I've signed off on three 'transformative' initiatives in my career and written off every one of them as a loss. So I'm not impressed by vision — I'm impressed by a plan that survives contact with a budget. Tell me what you're actually building, what it costs, and how I'll know we're not lighting money on fire. And 'we'll figure it out as we go' is not an answer in this office.",
+        pmConcept:"Defining scope within constraints" },
+      { scene:"You've got a wall of sticky notes — every need, every conflict, every idea from two weeks in the schools. Now it has to become a plan that Rena Okafor will fund. She arrives precisely on time, sets down a single sheet of paper with last year's failed tech spend circled in red, and waits.",
+        speaker:"rena",
+        dialogue:"See this number? That's what the last 'classroom of the future' cost this district before it died in a storage room. I am not approving another one of those. So impress me with discipline, not dreams. What's in, what's out, what's it cost — and what happens to my money if it doesn't work?",
+        pmConcept:"Defining scope within constraints" },
+    ],
+    slots: [
+      {
+        prompts:[
+          "Rena wants discipline, not dreams. How do you define what this project actually is?",
+          "It's time to draw the line around the work. With the budget director watching, how do you scope it?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"One pilot classroom, clearly bounded", description:"Propose a single proof-of-concept room with a tight, defined feature set.",
+            outcome:"You propose one pilot classroom — Vivian's, deliberately — with a defined, modest feature set tied to the needs you found. Every dollar traces to something real. Rena's eyebrows actually lift. A bounded, honest scope she can fund and measure is the rarest thing that walks into her office.",
+            speaker:"rena", reaction:"One room. Defined. Measurable. A real number with a real boundary. ...You may be the first person to bring me a plan instead of a wish.",
+            coaching:"Defining a tight, bounded scope tied to real needs — and proving it small before going big — is what makes a vision fundable. Containing the work to a pilot also contains the financial risk, which is exactly what a budget owner needs to say yes.",
+            pmTerm:"defining scope" },
+          { id:"B", weight:0, label:"Transform several schools at once", description:"Think big to match the superintendent's ambition — propose a multi-school launch.",
+            outcome:"You match Calhoun's ambition and pitch a multi-school launch. Rena closes her laptop. The number is enormous, nothing's been proven, and you're asking her to bet the district on a hunch. You've confused the superintendent's vision with a fundable plan — and to the person holding the money, that reads as recklessness.",
+            speaker:"rena", reaction:"You want me to fund 'transformative' across four buildings with zero evidence it works? That's not ambition. That's the exact mistake that's in red ink on this page.",
+            coaching:"Scaling before proving the concept ignores risk and overwhelms the budget. Mature delivery validates an idea in a small, controlled scope first, then expands — protecting both the money and your credibility with the people who control it.",
+            pmTerm:"proof of concept" },
+          { id:"C", weight:1, label:"Keep scope open to adapt", description:"Argue for flexibility so you can respond to what you learn.",
+            outcome:"You make the case for staying flexible. There's wisdom in it — but to Rena, 'flexible' and 'undefined' sound identical, and she can't fund a blank. You'll have to come back with edges. The instinct to adapt is good; it just needs a defined starting boundary to adapt *from*.",
+            speaker:"rena", reaction:"'Flexible' is the word people use when they haven't decided. Come back with a boundary. You can adjust inside it — but give me a box first.",
+            coaching:"Adaptability is valuable, but a budget owner needs a defined boundary to approve and measure against. The mature approach defines a clear initial scope and then manages changes deliberately — adapting within a boundary, not in place of one.",
+            pmTerm:"scope boundary" },
+        ],
+      },
+      {
+        prompts:[
+          "Scope is set. Now — who does what, and how do you keep the costs honest?",
+          "Rena's satisfied with the boundary. How do you organize the actual work and money behind it?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"Break the work into owned pieces", description:"Split the pilot into clear chunks, each with an owner, a cost, and a checkpoint.",
+            outcome:"You break the pilot into pieces — room setup, teacher training, content, the launch — each with a named owner, a line-item cost, and a date. Suddenly nobody can hide and nothing's vague. Tyler can see his part, Rena can see every dollar, and the whole thing looks like something a grown-up is running.",
+            speaker:"tyler", reaction:"Oh, this is clean — I can see exactly what's mine, what it costs, and when it's due. No more guessing whose job something is.",
+            coaching:"Decomposing the work into owned, costed, scheduled pieces is what makes a plan executable and a budget trackable. It connects scope to people, money, and time — the structure that lets a leader actually steer instead of hope.",
+            pmTerm:"breaking down the work" },
+          { id:"B", weight:1, label:"Write one master to-do list", description:"Capture everything that needs doing in a single shared list.",
+            outcome:"You build one long shared checklist. It captures the work, and that's better than nothing — but with no owners and no costs attached, dependencies hide and Rena can't see where the money lives. Things will get done, but coordination and budget tracking will cost you more sweat than they should.",
+            speaker:"rena", reaction:"A list of tasks isn't a budget. Which of these costs money? Who's accountable for the overruns? I can't track a checklist.",
+            coaching:"A flat list captures activity but misses ownership, cost, and dependency. Without breaking work into accountable, costed pieces, both schedule and budget control suffer — problems surface late, when they're most expensive to fix.",
+            pmTerm:"accountability" },
+          { id:"C", weight:0, label:"Keep the budget loose for agility", description:"Avoid over-planning costs so you can move money where it's needed later.",
+            outcome:"You decide to keep the budget loose so you can stay nimble. Rena's response is immediate and icy. An unallocated budget isn't agility to her — it's an uncontrolled risk with her name on it. You've handed the one stakeholder you most need to win the exact thing she most fears.",
+            speaker:"rena", reaction:"Loose budget. You want to keep the *money* loose. Do you know what that sounds like from this chair? It sounds like the last three failures.",
+            coaching:"Leaving a budget unallocated in the name of flexibility reads as uncontrolled risk to a finance stakeholder. Sound delivery plans costs deliberately and manages changes to them openly — discipline is what earns the freedom to adapt later.",
+            pmTerm:"cost discipline" },
+        ],
+      },
+      {
+        prompts:[
+          "Before the pilot launches, how do you handle the web of stakeholders who all want to know what's happening?",
+          "Everyone from Calhoun to Vivian wants visibility. How do you keep this many zones informed without drowning?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"Tailor updates to each zone", description:"Give each stakeholder the slice of information they actually care about, on a set rhythm.",
+            outcome:"You set up a simple rhythm but tailor it: Calhoun gets vision-and-progress, Rena gets dollars-and-variance, Vivian gets what's-changing-in-her-room, Diaz gets impact-on-his-numbers. Each one hears the project in their own language. Nobody feels managed; everybody feels seen.",
+            speaker:"calhoun", reaction:"My budget director and my most stubborn teacher both told me they finally feel in the loop. Do you know how rare that is? You're speaking everyone's language.",
+            coaching:"A communication plan that tailors information to what each stakeholder actually cares about is how a PM holds together a project full of competing zones. The same update, translated for each silo, is what keeps a fractured group of stakeholders aligned.",
+            pmTerm:"communication plan" },
+          { id:"B", weight:1, label:"One newsletter for everyone", description:"Send a single consistent update to all stakeholders at once.",
+            outcome:"You send one update to everyone. It's fair and efficient — but Rena skims past the vision talk looking for numbers, and Vivian can't find the one line that affects her room. A single broadcast treats very different zones as one audience, and each gets a little less than they needed.",
+            speaker:"rena", reaction:"I got the newsletter. I scrolled through a lot of inspiration to find one budget line. Just tell me my part.",
+            coaching:"A single uniform update is better than silence, but it ignores that stakeholders need different information. Tailoring communication to each group's interests is what makes it land — a broadcast asks everyone to dig for their own relevance.",
+            pmTerm:"tailored communication" },
+          { id:"C", weight:0, label:"Update people when there's news", description:"Keep it lean — reach out only when something significant happens.",
+            outcome:"You decide to communicate only when there's real news. Efficient, until the silence does its work: Rena assumes the worst about the money, Vivian assumes she's being worked around, and by the time you surface with an update, three zones have each written their own anxious story. Silence doesn't read as calm — it reads as hiding.",
+            speaker:"vivian", reaction:"Haven't heard a word in two weeks. In my experience that means something's wrong and nobody wants to say it. Is something wrong?",
+            coaching:"Communicating only when news arrives leaves stakeholders to fill the silence with worst-case assumptions — especially zone-protective ones. Proactive, regular communication manages expectations before anxiety hardens into resistance.",
+            pmTerm:"proactive communication" },
+        ],
+      },
+    ],
+  },
+
+  // ── PHASE 4: THE PILOT (adaptive feel) ───────────────────────────────────
+  execution: {
+    openers: [
+      { scene:"Launch week. It's Vivian's room — the hardest sell, deliberately chosen, because if it works here it works anywhere. The new setup is live, the kids are curious, Tyler is hovering over the equipment. And within the first hour, reality does what reality does: something the plan didn't predict.",
+        speaker:"tyler",
+        dialogue:"Okay — good news, the kids are SO into the interactive stuff, more than we thought. Bad news? Half of them blew through the lesson in fifteen minutes and the other half are stuck, and Vivian's giving me a look like 'I told you so.' The plan assumed everyone moves together. They don't. What do we do?",
+        pmConcept:"Adapting as you learn" },
+      { scene:"The pilot is real now. A room full of actual Richmond City teenagers, the new design humming, and the gap between a plan on paper and thirty live human beings opening up in real time. Tyler jogs over, half-thrilled, half-panicked, on day two.",
+        speaker:"tyler",
+        dialogue:"So the engagement is unreal — even Vivian's hardest cases are leaning in. But we've already hit something we didn't plan for: the fast kids finish and get bored, the slower kids feel rushed, and it's only Tuesday. The schedule we built assumed one pace. Reality brought us thirty. How do you want to handle it?",
+        pmConcept:"Adapting as you learn" },
+    ],
+    slots: [
+      {
+        prompts:[
+          "The pilot just taught you something the plan got wrong — kids don't move at one pace. How do you respond?",
+          "Day one already broke an assumption in your plan. What do you do with that?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"Adjust the design and try again tomorrow", description:"Treat it as learning — tweak the pacing, test the change the next day.",
+            outcome:"You don't panic — you treat the surprise as data. Overnight you and Tyler rework the lesson to let fast kids go deeper and slow kids get support, and you try it again the next morning. It works better. You've shown the team that the pilot is *supposed* to teach you — and that adjusting fast is the point, not a failure.",
+            speaker:"vivian", reaction:"Huh. You didn't defend your plan, you changed it. Overnight. I've never seen one of these people do that. ...That, I respect.",
+            coaching:"Treating an early surprise as something to learn from and adjusting quickly is the adaptive mindset — responding to what you discover rather than clinging to the original plan. A pilot's whole job is to surface exactly this kind of lesson while the stakes are small.",
+            pmTerm:"adapting to change" },
+          { id:"B", weight:1, label:"Note it for the final report", description:"Log the issue as a finding to address in the full rollout later.",
+            outcome:"You write it down as a lesson for the eventual rollout and keep the pilot running as designed. Disciplined — but the kids in front of you spend the rest of the pilot in a setup you already know is flawed. You captured the learning and then didn't use it while you still could. A pilot you don't adjust is just a slow way to confirm what you'd have learned faster by adjusting.",
+            speaker:"tyler", reaction:"We're... leaving it broken for now and fixing it in the report? But we could just fix it tomorrow and watch what happens.",
+            coaching:"Capturing a lesson is good, but a pilot exists so you can act on what you learn *while it's running*. Deferring every adjustment to a later phase wastes the pilot's real value — the chance to test changes cheaply and immediately.",
+            pmTerm:"lessons learned" },
+          { id:"C", weight:0, label:"Stick to the plan — it's only day one", description:"Hold the line; you can't change course every time something wobbles.",
+            outcome:"You decide to hold the line — a plan's a plan. But by Friday the bored kids are acting out and the rushed kids have checked out, and Vivian's watching you prove her oldest fear: that you care more about your plan than her students. The rigidity you mistook for discipline just cost you the room.",
+            speaker:"vivian", reaction:"So you saw it wasn't working Monday and rode it till Friday anyway. That's not discipline. That's the same stubbornness that put the last one in a closet.",
+            coaching:"Rigidly following a plan in the face of clear evidence it isn't working is the opposite of adaptive leadership. When a pilot reveals a flaw, the disciplined move is to respond to reality — not to defend a plan that the room is plainly rejecting.",
+            pmTerm:"responding to reality" },
+        ],
+      },
+      {
+        prompts:[
+          "The pilot's working and word spreads — now Tyler wants to bolt on three exciting new tools mid-pilot. Your call?",
+          "Momentum is high and Tyler's pushing to expand the pilot right now. How do you handle it?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"Evaluate it against scope and budget", description:"Welcome the idea but assess its cost and impact before committing.",
+            outcome:"You don't say no — you say 'show me what it costs and what it bumps.' Tyler runs the numbers and two of the three ideas don't survive contact with the budget. The one that does, you fold in cleanly. You kept the door open to good ideas without letting enthusiasm quietly blow the scope and the money.",
+            speaker:"rena", reaction:"You ran it past the budget before you said yes. Do you understand how rare that sentence is in my world? Keep doing exactly that.",
+            coaching:"Welcoming new ideas but evaluating their cost and impact before committing is how you stay adaptive without losing control. Change is fine — uncontrolled change is what sinks projects and budgets. The discipline is in the evaluation, not in refusing.",
+            pmTerm:"managing change" },
+          { id:"B", weight:0, label:"Add them all — strike while it's hot", description:"The energy's there; expand now while everyone's excited.",
+            outcome:"You ride the wave and greenlight all three. For a few days it's electric — then the room's doing too much, training can't keep up, Vivian's overwhelmed again, and Rena finds spending she never approved. The very thing that was working starts to buckle under everything you piled on it.",
+            speaker:"rena", reaction:"Where did these charges come from?! We had a number. This is precisely — *precisely* — how the last one died. Uncontrolled.",
+            coaching:"Adding scope mid-flight on enthusiasm, without evaluating cost and impact, is how a working pilot collapses under its own weight. Even great ideas have to be weighed against the budget and the plan before they're committed.",
+            pmTerm:"scope creep" },
+          { id:"C", weight:1, label:"Freeze everything until rollout", description:"Lock the pilot completely — no changes until the full version.",
+            outcome:"You freeze the pilot solid — nothing changes until rollout. It protects the budget, safely. But you may have just waved off the one ten-dollar tweak that would've strengthened your results, in the name of avoiding all risk. A total freeze is safer than chaos, but it isn't free — you traded away some real upside for certainty.",
+            speaker:"tyler", reaction:"Everything's frozen? Even the tiny free fix the kids basically asked for? ...Okay. You're the boss. Felt like a miss, though.",
+            coaching:"A blanket freeze controls risk but can forgo genuine, low-cost improvements the pilot revealed. The most refined approach evaluates each change on its merits rather than refusing all of them — a hard 'no' is just risk-aversion wearing discipline's clothes.",
+            pmTerm:"change evaluation" },
+        ],
+      },
+      {
+        prompts:[
+          "Calhoun shows up unannounced to see his vision in action. How do you handle the superintendent's visit?",
+          "The superintendent drops in mid-pilot, wanting to see it live and real. What's your approach?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"Show him the real thing, bumps included", description:"Walk him through honestly — the wins and the things you're still fixing.",
+            outcome:"You show Calhoun the actual pilot — the kids leaning in, and the pacing problem you're mid-way through solving. He trusts every word *because* you didn't hide the rough edges. An honest picture from his PM tells him he's got someone running this who won't let him get blindsided at the board.",
+            speaker:"calhoun", reaction:"You showed me what's broken, not just what shines. That's how I know the good parts are real. This is the leadership I hired.",
+            coaching:"Giving a sponsor an honest status — strengths and open issues alike — builds the credibility that carries a project through hard moments. Transparency, not a polished tour, is what lets stakeholders back you when decisions get made.",
+            pmTerm:"honest status reporting" },
+          { id:"B", weight:1, label:"Lead with the highlights", description:"Steer the visit toward what's working best to keep his confidence up.",
+            outcome:"You focus Calhoun on the wins. He leaves glowing — but a little unprepared for the issues you skipped, which means a harder conversation when they surface later. A highlight reel buys confidence today and quietly borrows against tomorrow's trust.",
+            speaker:"calhoun", reaction:"Looks fantastic! ...Nothing I should be bracing for? You know I hate learning things secondhand at the board.",
+            coaching:"Showcasing only the wins skews the picture and risks a credibility hit when hidden issues emerge. Balanced reporting manages a sponsor's expectations honestly and prevents the kind of surprise that erodes trust right when you need it.",
+            pmTerm:"managing expectations" },
+          { id:"C", weight:0, label:"Stage a perfect demo", description:"Quickly set up a flawless scripted moment so the visit dazzles.",
+            outcome:"You stage a flawless show — best students, smoothest tool, nothing that could go wrong. Calhoun is dazzled. But you've shown him a fiction, and Vivian is standing right there watching you sell a version of her room that doesn't exist. When reality surfaces later, the gap between the show and the truth will cost you with both of them.",
+            speaker:"vivian", reaction:"That's not what Tuesday looked like and he knows I know it. Why'd you dress it up for the boss instead of showing him the real work?",
+            coaching:"Staging an unrealistic demo misrepresents the project and detonates trust when reality emerges — and it corrodes your standing with the stakeholders who witnessed the truth. Accurate status is both an ethical and practical obligation of the PM.",
+            pmTerm:"integrity in reporting" },
+        ],
+      },
+      {
+        prompts:[
+          "The pilot's winding down and the results are in. How do you wrap it up for the board?",
+          "It's the last week of the pilot. How do you turn what happened into something the board can act on?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"Measure results against the goal", description:"Compare what happened to the success Calhoun defined back in phase one.",
+            outcome:"You measure the pilot against the very thing Calhoun named as success in his office — the checked-out kid leaning in, teachers who'd keep using it. The data tells a real story, good and imperfect, and you can prove it. You're walking into the board meeting with evidence, not adjectives. Even Rena nods at the numbers.",
+            speaker:"calhoun", reaction:"You're measuring against exactly what I told you 'winning' looked like on day one. You listened then, and you delivered proof now. That closes the loop.",
+            coaching:"Measuring outcomes against the success the sponsor defined at the start is what turns activity into demonstrated value. Tying the close back to the original vision is how a leader proves the project did what it set out to do.",
+            pmTerm:"measuring against goals" },
+          { id:"B", weight:1, label:"Collect great stories and quotes", description:"Gather the best testimonials from kids and teachers for the board.",
+            outcome:"You gather wonderful stories — a kid who finally engaged, a parent's note, even a grudging Vivian quote. It's moving, and it'll play well. But Rena's voice is in your head: stories aren't numbers, and a board deciding on real money will want both. You've got the heart of the case but not yet the spine.",
+            speaker:"rena", reaction:"Lovely stories. I fund evidence. Bring me what moved, by how much, against what it cost — *then* tell me the stories.",
+            coaching:"Compelling stories add color and human truth, but a funding decision needs measured results too. Anecdote and evidence together make the strongest case — stories alone leave a budget-minded board without the numbers they answer to.",
+            pmTerm:"evidence vs. anecdote" },
+          { id:"C", weight:0, label:"Declare it a win and plan to scale", description:"It clearly worked — start designing the district-wide version now.",
+            outcome:"You call it a success and start sketching the rollout. But when the board asks 'improved by how much, and at what cost per room?' you have a feeling, not a figure. Assumed success collapses the instant someone asks for proof — and a board, unlike a hallway, always asks.",
+            speaker:"rena", reaction:"You want to scale something district-wide that you never actually measured? That's not a proposal. That's a hope with a price tag.",
+            coaching:"Declaring success without measurement leaves the project indefensible exactly when it matters most — in front of decision-makers. A leader quantifies results against the goal before asking anyone to fund the next step.",
+            pmTerm:"demonstrating value" },
+        ],
+      },
+    ],
+  },
+
+  // ── PHASE 5: FACING THE BOARD ────────────────────────────────────────────
+  closeout: {
+    openers: [
+      { scene:"The school board chamber. Seven members at a curved dais, Calhoun beside you, Rena two seats down with her spreadsheet, Vivian in the public rows — arms crossed, but she came. Your pilot results are loaded. Ninety days of work narrows to the next twenty minutes.",
+        speaker:"calhoun",
+        dialogue:"This is it, Garius. The board wants three things: what you built, what it proved, and what it'll take to do it for real. I hired you out of a stack of applications for this exact moment. Go show them what we found. I'm right beside you.",
+        pmConcept:"Delivering and securing the decision" },
+      { scene:"Presentation night. The board is assembled, the public seats half-full — teachers, a few parents, a local reporter. Everything you've done since that first cup of coffee in Calhoun's office comes down to this room and these seven votes. Your documentation is in order. The results are honest.",
+        speaker:"calhoun",
+        dialogue:"Walk them through the whole journey — the vision, what the schools taught you, the pilot, the real numbers, and your plan to scale. Make it land. You earned your way into this job; now earn the district's belief in what you built.",
+        pmConcept:"Delivering and securing the decision" },
+    ],
+    slots: [
+      {
+        prompts:[
+          "How do you open in front of the board?",
+          "Seven board members are waiting. How do you frame your case?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"Open with the kid, then the proof", description:"Start with the real problem — a student who'd checked out — then show what the pilot changed.",
+            outcome:"You open not with technology but with a student: the kind of checked-out kid Calhoun described on day one, and what happened to her in the pilot. Then you show the numbers behind the story. The board leans in. You've framed this as a solution to a problem they recognize — not a gadget someone wanted to buy.",
+            speaker:"community", reaction:"As a parent in this district, that's the first time anyone up there has shown me they actually understand how my kid lives and learns. Thank you.",
+            coaching:"Framing the close around the real human need and then proving it with results connects the work to value the board cares about. Need, solution, evidence — in that order — is what earns a decision and the funding behind it.",
+            pmTerm:"connecting work to value" },
+          { id:"B", weight:1, label:"Open with the impressive tech", description:"Lead with the most eye-catching tools to grab the room.",
+            outcome:"You open with the flashy capability. It's a strong hook — but two board members are already glancing at Rena and asking what it costs before you've told them why any of it matters. Leading with the tool instead of the need invites the price question first, and now you're defending instead of inspiring.",
+            speaker:"rena", reaction:"Impressive equipment. But you led with the price tag before the point. Tie it to what it *did*, fast, or this becomes a budget fight.",
+            coaching:"Leading with the solution before establishing the need frames the project as an expense rather than a value. Anchoring first on the problem solved is what justifies the cost in decision-makers' minds — open with why, not what.",
+            pmTerm:"framing the value" },
+        ],
+      },
+      {
+        prompts:[
+          "A board member asks point-blank: 'What would you do differently?' How do you answer?",
+          "The board wants to know what you learned the hard way. What do you tell them?",
+        ],
+        choices:[
+          { id:"A", weight:2, label:"Tell them honestly, and what it taught you", description:"Name the real mistakes and how they sharpen the rollout plan.",
+            outcome:"You answer straight: you'd build the pacing fix in from day one, and you'd bring the veterans in even earlier. Then you show how those exact lessons are already baked into your scaling plan. The board visibly relaxes — a leader who names his own gaps is one they'll trust with more. You close with full credibility, and Vivian, in the back, gives the smallest nod.",
+            speaker:"calhoun", reaction:"That answer — right there — is why I'll go to the mat for this funding. You learn, you adjust, and you tell the truth about it. That's the whole job.",
+            coaching:"Openly sharing what you'd change, and showing how it improves the next phase, signals maturity and earns trust. Honest reflection at the close turns one project's experience into wisdom for the next — it's a strength, never a weakness.",
+            pmTerm:"lessons learned" },
+          { id:"B", weight:0, label:"Tell them it went great", description:"Project total confidence — say you wouldn't really change a thing.",
+            outcome:"You claim it all went smoothly. But Vivian was in that room for the rough days, Rena saw every budget wobble, and the board knows real pilots have bumps. Claiming perfection reads as either naïve or dishonest — and it quietly undercuts the genuine credibility your real results had earned you up to that point.",
+            speaker:"vivian", reaction:"Went great? I was there Tuesday through Friday, hon. Nothing goes great. The honesty would've served you better than the polish.",
+            coaching:"Claiming a flawless project signals you didn't reflect — and erodes trust with anyone who saw the reality. A credible close always includes honest lessons; decision-makers trust a leader who improves over one who performs perfection.",
+            pmTerm:"credibility through honesty" },
+        ],
+      },
+    ],
+  },
+};
+
+
+// ============================================================================
+//  ENGINE (scenario-agnostic — selects from CONTENT, scores, persists)
+// ============================================================================
+
+const TOTAL_MAX_DECISION_SCORE = (2+3+3+4+2)*2; // 28
+
+const CERT_LEVELS = [
+  { min:90, label:"Project Manager",     color:"#D97706", desc:"PM Certificate Earned — Top Level" },
+  { min:80, label:"Project Leader",      color:"#059669", desc:"Strong PM Thinking Throughout" },
+  { min:60, label:"Project Coordinator", color:"#2563EB", desc:"Real PM Instincts Emerging" },
+  { min:40, label:"Project Contributor", color:"#7C3AED", desc:"Solid Foundation Building" },
+  { min:0,  label:"Project Participant", color:"#A8A29E", desc:"You Showed Up — Keep Going" },
+];
+const getCertLevel = (score, max) => {
+  const pct = max > 0 ? Math.round((score/max)*100) : 0;
+  return { ...CERT_LEVELS.find(l => pct >= l.min), pct };
+};
+
+const cap = (v,max) => Math.min(Math.max(0, Math.round(Number(v)||0)), max);
+const pick = (arr) => arr[Math.floor(Math.random()*arr.length)];
+const shuffle = (arr) => { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+// Build a decision object from a content slot: pick a prompt variant and
+// shuffle the choices so the "best" answer isn't always in the same position.
+function buildDecision(slot){
+  return {
+    prompt: pick(slot.prompts),
+    choices: shuffle(slot.choices).map((c,i)=>({ ...c, id:["A","B","C"][i] })),
+  };
+}
+
+function loadSave(){ try{ const r=localStorage.getItem(SAVE_KEY); return r?JSON.parse(r):null; }catch{ return null; } }
+function writeSave(d){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(d)); }catch{} }
+
+// ── UI Components ──────────────────────────────────────────────────────────
+function Avatar({char,size=38}){
+  const c=CHARS[char]||{initials:"?",color:"#888"};
+  return <div style={{width:size,height:size,borderRadius:"50%",background:c.color+"18",border:`1.5px solid ${c.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*0.3,fontWeight:700,color:c.color,flexShrink:0,fontFamily:"system-ui"}}>{c.initials}</div>;
+}
+
+function PhaseBar({currentId,completed}){
+  return(
+    <div style={{display:"flex",gap:3,marginBottom:12}}>
+      {PHASES.map(p=>{
+        const done=completed.includes(p.id),active=p.id===currentId&&!done;
+        return(
+          <div key={p.id} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+            <div style={{width:"100%",height:6,borderRadius:3,background:done?p.color:active?p.color+"66":C.bgLight,transition:"background 0.4s"}}/>
+            <div style={{fontSize:7,color:done?p.color:active?p.color:C.textMuted,fontFamily:"system-ui",fontWeight:done||active?700:400,textAlign:"center",lineHeight:1.3}}>
+              <div style={{fontSize:9}}>{done?"✓":p.n}</div>
+              <div>{p.short}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Card({children,style={}}){
+  return <div style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 18px",animation:"fadeIn 0.4s ease",...style}}>{children}</div>;
+}
+
+function Btn({children,onClick,variant="primary",color=C.blue,disabled=false,full=false,small=false}){
+  const[h,setH]=useState(false);
+  const base={border:"none",borderRadius:10,fontWeight:700,cursor:disabled?"not-allowed":"pointer",fontFamily:"system-ui",transition:"all 0.15s",opacity:disabled?0.6:1,width:full?"100%":"auto",padding:small?"8px 14px":"13px 24px",fontSize:small?12:14};
+  const s={
+    primary:{...base,background:h&&!disabled?color+"dd":color,color:"#fff"},
+    outline:{...base,background:h&&!disabled?C.bgLight:"transparent",color:C.textMid,border:`1.5px solid ${C.border}`},
+    ghost:{...base,background:"none",color:C.textMid,padding:"6px 8px",fontSize:12},
+  };
+  return <button onClick={()=>!disabled&&onClick()} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={s[variant]||s.primary}>{children}</button>;
+}
+
+function ChoiceCard({choice,onSelect,disabled,color}){
+  const[h,setH]=useState(false);
+  return(
+    <div onClick={()=>!disabled&&onSelect(choice)} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
+      style={{background:h&&!disabled?color+"0a":C.bgCard,border:`1.5px solid ${h&&!disabled?color+"99":C.border}`,borderRadius:12,padding:"12px 14px",cursor:disabled?"not-allowed":"pointer",marginBottom:8,transition:"all 0.15s",opacity:disabled?0.5:1}}>
+      <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+        <div style={{width:28,height:28,borderRadius:7,background:h&&!disabled?color:"#F1EFE8",color:h&&!disabled?"#fff":color,border:`1.5px solid ${color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:13,flexShrink:0,fontFamily:"system-ui",transition:"all 0.15s"}}>{choice.id}</div>
+        <div style={{flex:1}}>
+          <div style={{color:C.text,fontWeight:700,fontSize:14,marginBottom:2,fontFamily:"system-ui"}}>{choice.label}</div>
+          <div style={{color:C.textMid,fontSize:13,lineHeight:1.5,fontFamily:"system-ui"}}>{choice.description}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Pill({label,color=C.blue}){
+  return <span style={{display:"inline-block",background:color+"15",color,border:`1px solid ${color}33`,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700,fontFamily:"system-ui"}}>{label}</span>;
+}
+
+function ScoreBox({score,max,label,color}){
+  const pct=max>0?score/max:0;
+  const c=color||(pct>=0.8?C.green:pct>=0.5?C.amber:C.red);
+  return(
+    <div style={{background:c+"10",border:`1px solid ${c}33`,borderRadius:10,padding:"10px 12px",textAlign:"center"}}>
+      <div style={{fontSize:10,color:C.textMuted,fontFamily:"system-ui",marginBottom:2}}>{label}</div>
+      <div style={{fontSize:20,fontWeight:900,color:c,fontFamily:"system-ui"}}>{score}<span style={{fontSize:11,color:C.textMuted,fontWeight:400}}>/{max}</span></div>
+    </div>
+  );
+}
+
+function DeliverableRow({item,status,note}){
+  const icon=status==="Achieved"?"✅":status==="Partially Achieved"?"⚠️":"❌";
+  const color=status==="Achieved"?C.green:status==="Partially Achieved"?C.amber:C.red;
+  return(
+    <div style={{display:"flex",gap:10,alignItems:"flex-start",padding:"10px 0",borderBottom:`1px solid ${C.bgLight}`}}>
+      <span style={{fontSize:16,flexShrink:0,marginTop:1}}>{icon}</span>
+      <div>
+        <div style={{fontSize:13,fontWeight:700,color:C.text,fontFamily:"system-ui",marginBottom:1}}>{item}</div>
+        <div style={{fontSize:11,color,fontFamily:"system-ui",fontWeight:700,marginBottom:2}}>{status}</div>
+        <div style={{fontSize:12,color:C.textMid,fontFamily:"system-ui",lineHeight:1.5}}>{note}</div>
+      </div>
+    </div>
+  );
+}
+
+function CertificateBadge({cert,score,max}){
+  const earned = cert.pct >= 90;
+  return(
+    <div style={{background:earned?C.goldLight:C.bgLight,border:`2px solid ${earned?C.gold:C.border}`,borderRadius:14,padding:"20px 18px",textAlign:"center",marginBottom:14}}>
+      {earned&&<div style={{fontSize:32,marginBottom:8}}>🏆</div>}
+      <div style={{fontSize:10,color:cert.color,letterSpacing:"0.3em",textTransform:"uppercase",fontFamily:"system-ui",fontWeight:700,marginBottom:6}}>{earned?"PM Achievement Certificate":"Achievement Level"}</div>
+      <div style={{fontSize:22,fontWeight:900,color:cert.color,fontFamily:"system-ui",marginBottom:4}}>{cert.label}</div>
+      <div style={{fontSize:13,color:C.textMid,fontFamily:"system-ui",marginBottom:8}}>{SCENARIO.learner} · {SCENARIO.title} · {SCENARIO.district}</div>
+      <div style={{fontSize:13,color:cert.color,fontFamily:"system-ui",fontWeight:700,marginBottom:4}}>{cert.pct}% · {score}/{max} points</div>
+      {!earned&&<div style={{fontSize:12,color:C.textMuted,fontFamily:"system-ui",fontStyle:"italic"}}>90% earns the PM Certificate — run it again</div>}
+    </div>
+  );
+}
+
+// ── Deterministic checkpoint & closeout builders (no AI; computed locally) ──
+function buildCheckpoint(phase, decisions, phaseScore, maxPS, totalDS, maxDS){
+  const cert = getCertLevel(totalDS, maxDS);
+  const pct = maxPS>0 ? phaseScore/maxPS : 0;
+  const best = decisions.filter(d=>d.choice.weight===2).length;
+  const avoid = decisions.filter(d=>d.choice.weight===0).length;
+  let headline, summary, strength, sharpen;
+  if(pct>=0.9){ headline="Outstanding Phase Leadership"; summary=`You moved through ${phase.title} with real command, ${SCENARIO.learner.split(" ")[0]}. Your choices reflected the instincts of a project manager who plans before acting.`; }
+  else if(pct>=0.6){ headline="Solid PM Thinking"; summary=`A strong phase overall. You showed genuine project judgment in ${phase.title}, with room to sharpen a decision or two.`; }
+  else{ headline="A Learning Phase"; summary=`This phase had some tougher moments, and that's exactly where the real learning lives. Every project manager builds judgment through decisions like these.`; }
+  strength = best>0 ? `You made ${best} strong, proactive call${best>1?"s":""} that a seasoned PM would recognize.` : `You stayed engaged and kept the project moving forward.`;
+  sharpen = avoid>0 ? `Watch for the path of least resistance — a couple of choices leaned reactive where a proactive move would have served the project better.` : `Keep tightening the link between each decision and your documented plan.`;
+  const lessonPool = {
+    assignment:"Leadership starts by understanding what the person who hired you actually means by success — everything you build later gets measured against that shared picture.",
+    assessment:"The real needs of a project live in people's daily reality, not in the vision statement. Listening to every zone — even the resistant ones — is how you find them.",
+    planning:"Turning competing needs into a bounded, costed plan is what earns the trust to spend real money. A clear scope is what makes a vision fundable.",
+    execution:"A pilot exists to teach you what the plan couldn't predict. The strongest leaders adapt to what they learn in motion — evaluating changes against cost without losing the thread.",
+    closeout:"Closing well means measuring results against the goal you set at the start, telling the honest truth about what you learned, and earning the decision to go forward.",
+  };
+  return {
+    headline, summary, strength, sharpen,
+    pmLesson: lessonPool[phase.id],
+    motivational: pct>=0.6 ? `You're leading like a project manager, ${SCENARIO.learner.split(" ")[0]}. On to the next phase.` : `Every strong PM has phases like this. Reset, refocus, and lead the next one.`,
+    currentStanding: `Current standing: ${cert.label} — ${cert.pct}% of max score`,
+  };
+}
+
+function buildCloseout(allHist, totalDS, maxDS){
+  const cert = getCertLevel(totalDS, maxDS);
+  const earned = cert.pct>=90;
+  const tier = cert.pct>=80 ? "high" : cert.pct>=50 ? "mid" : "low";
+  const dStatus = (good,okv) => tier==="high"?good:tier==="mid"?okv:"Not Achieved";
+  return {
+    headline: earned ? `You delivered the Classroom of the Future, ${SCENARIO.learner.split(" ")[0]}.` : `You led this project from charter to board, ${SCENARIO.learner.split(" ")[0]}.`,
+    marcusDebrief: tier==="high"
+      ? `Garius, you took a vague ambition and turned it into a funded, proven pilot. You listened before you built, you protected scope when it counted, and you told me the truth even when it wasn't flattering. The board saw a project manager, not a vendor.`
+      : tier==="mid"
+      ? `Garius, you got this across the line. There were moments I'd want sharper — a little more discipline on scope, a little more documentation — but you led a real pilot and brought the board real results. That's a foundation to build on.`
+      : `Garius, this was a hard one, and you stayed in the seat the whole way. Some decisions got ahead of the evidence, and we felt it at the board. But you've now lived the full project lifecycle — and that experience is exactly what the CAPM is preparing you for.`,
+    marcusFinal: earned
+      ? `I handed you a sentence on a whiteboard — "meet students where they are." You handed me back a plan to do it. Well done, PM.`
+      : `Run it again. You know the lifecycle now, and the certificate is closer than you think.`,
+    vivianReaction: tier==="high"
+      ? `I've buried four of these projects. This is the first one I'd actually fight to keep. You listened, and you followed through.`
+      : tier==="mid" ? `Better than most. You showed up and you mostly followed through — that already puts you ahead.`
+      : `I'll be honest — it felt familiar in the rough spots. But you're learning, and that counts for something.`,
+    tylerReaction: tier==="high" ? `That was awesome! You kept us focused without killing the fun ideas. I learned a ton watching you manage scope.`
+      : tier==="mid" ? `Good run! Wish we'd locked some things down sooner, but the kids loved it.`
+      : `We had some chaos, but hey — we shipped a pilot. Next time, tighter scope, yeah?`,
+    renaReaction: tier==="high" ? `You respected the budget and proved value with numbers. I'd fund your next project without hesitation.`
+      : tier==="mid" ? `The numbers mostly held. A few surprises I didn't love, but defensible overall.`
+      : `The spending got ahead of the plan more than once. The idea has merit — the financial discipline needs work.`,
+    diazReaction: tier==="high" ? `You spoke to my building's reality, not just the superintendent's vision. My doors are open to phase two.`
+      : tier==="mid" ? `It didn't hurt my numbers, and that's more than I expected. Cautiously on board.`
+      : `I'm still not sure what this did for my school specifically. I needed to feel more like a partner than a participant.`,
+    deliverables: [
+      { item:SCENARIO.deliverables[0], status:dStatus("Achieved","Partially Achieved"), note: tier==="high"?"A clear, evidence-based vision grounded in real discovery.":tier==="mid"?"A vision was defined, though parts rested on assumption over evidence.":"The vision stayed loosely defined and hard to defend at the board." },
+      { item:SCENARIO.deliverables[1], status:dStatus("Achieved","Partially Achieved"), note: tier==="high"?"A real pilot ran and produced measurable engagement gains.":tier==="mid"?"A pilot ran, but measurement against baseline was incomplete.":"The pilot happened but results were largely unmeasured." },
+      { item:SCENARIO.deliverables[2], status:dStatus("Achieved","Partially Achieved"), note: tier==="high"?"A documented, board-ready implementation plan with justification.":tier==="mid"?"A plan was presented, though documentation had gaps.":"The scaling case lacked the evidence the board needed." },
+    ],
+    phaseRecaps: [
+      { phase:"The Mandate", pmTerm:"sponsor's vision", lesson:"Understand what success means to the sponsor before you act." },
+      { phase:"Into the Schools", pmTerm:"eliciting needs", lesson:"The real needs live in people's days — listen before you design." },
+      { phase:"Building the Plan", pmTerm:"defining scope", lesson:"A bounded, costed plan is what makes a vision fundable." },
+      { phase:"The Pilot", pmTerm:"adapting to change", lesson:"A pilot exists to teach you — adjust while the stakes are small." },
+      { phase:"Facing the Board", pmTerm:"lessons learned", lesson:"Measure against the goal and tell the honest truth to close strong." },
+    ],
+    finalMessage: earned
+      ? `You've earned the Project Manager Certificate on the Classroom of the Future. This is exactly the lifecycle thinking the CAPM rewards — carry it forward.`
+      : `You're building real project-management instincts, ${SCENARIO.learner.split(" ")[0]}. The certificate is within reach — run it again and lead it even sharper.`,
+  };
+}
+
+// ── Main App ───────────────────────────────────────────────────────────────
+function App(){
+  const[screen,setScreen]=useState("splash");
+  const[phaseIdx,setPhaseIdx]=useState(0);
+  const[completed,setCompleted]=useState([]);
+  const[xp,setXp]=useState(0);
+  const[totalDS,setTotalDS]=useState(0);
+  const[maxDS,setMaxDS]=useState(0);
+  const[rels,setRels]=useState({calhoun:50,vivian:50,tyler:50,rena:50,diaz:50});
+  const[opener,setOpener]=useState(null);
+  const[slotIdx,setSlotIdx]=useState(0);
+  const[curDecision,setCurDecision]=useState(null);
+  const[lastOutcome,setLastOutcome]=useState(null);
+  const[checkpoint,setCheckpoint]=useState(null);
+  const[phaseDecisions,setPhaseDecisions]=useState([]);
+  const[phaseScore,setPhaseScore]=useState(0);
+  const[decCount,setDecCount]=useState(0);
+  const[allHist,setAllHist]=useState([]);
+  const[closeout,setCloseout]=useState(null);
+  const[error,setError]=useState(null);
+  const[log,setLog]=useState([]);
+  const[showLog,setShowLog]=useState(false);
+  const[loginInput,setLoginInput]=useState("");
+  const[loginErr,setLoginErr]=useState("");
+
+  const phase=PHASES[phaseIdx];
+  const maxPS=phase.maxDecisions*2;
+
+  useEffect(()=>{
+    const s=loadSave();
+    if(s){ setPhaseIdx(s.phaseIdx||0);setCompleted(s.completed||[]);setXp(cap(s.xp||0,9999));
+      setTotalDS(s.totalDS||0);setMaxDS(s.maxDS||0);
+      setRels(s.rels||{calhoun:50,vivian:50,tyler:50,rena:50,diaz:50});
+      setAllHist(s.allHist||[]);setLog(s.log||[]); }
+  },[]);
+
+  const save=(u={})=>writeSave({phaseIdx,completed,xp,totalDS,maxDS,rels,allHist,log,...u});
+
+  const startPhase=()=>{
+    const content=CONTENT[phase.id];
+    setOpener(pick(content.openers));
+    setSlotIdx(0);
+    setCurDecision(buildDecision(content.slots[0]));
+    setPhaseDecisions([]);setPhaseScore(0);setDecCount(0);
+    setLastOutcome(null);setCheckpoint(null);setError(null);
+    setScreen("decision");
+  };
+
+  const handleChoice=(choice)=>{
+    const newCount=decCount+1;
+    const rawScore=cap(choice.weight,2);
+    const xpMap={2:20,1:13,0:6};
+    const rawXP=xpMap[rawScore]||0;
+    const newPS=cap(phaseScore+rawScore,maxPS);
+    const newTotalDS=cap(totalDS+rawScore,TOTAL_MAX_DECISION_SCORE);
+    const newMaxDS=maxDS+2;
+    const newXP=cap(xp+rawXP,9999);
+    // relationship deltas based on which character reacts + weight
+    const newRels={...rels};
+    const spk=choice.speaker;
+    if(spk&&newRels[spk]!==undefined){ newRels[spk]=cap(newRels[spk]+(rawScore===2?4:rawScore===1?0:-4),100); }
+    const isLast = newCount >= phase.maxDecisions;
+    const out={ outcome:choice.outcome, speaker:choice.speaker, reaction:choice.reaction, coaching:choice.coaching, pmTerm:choice.pmTerm, score:rawScore, xp:rawXP, phaseComplete:isLast };
+    const newDec=[...phaseDecisions,{choice:{...choice,weight:rawScore},outcome:out,prompt:curDecision.prompt}];
+    const newLog=[...log,{phase:phase.title,decision:curDecision.prompt,chose:choice.label,weight:rawScore,outcome:choice.outcome,coaching:choice.coaching,pmTerm:choice.pmTerm}];
+    setXp(newXP);setPhaseScore(newPS);setTotalDS(newTotalDS);setMaxDS(newMaxDS);
+    setRels(newRels);setPhaseDecisions(newDec);setLastOutcome(out);
+    setDecCount(newCount);setLog(newLog);
+    save({xp:newXP,totalDS:newTotalDS,maxDS:newMaxDS,rels:newRels,log:newLog});
+    setScreen("outcome");
+  };
+
+  const handleContinue=()=>{
+    if(lastOutcome?.phaseComplete){
+      const cp=buildCheckpoint(phase,phaseDecisions,phaseScore,maxPS,totalDS,maxDS);
+      const newXP=cap(xp+15,9999);
+      const newCompleted=[...completed,phase.id];
+      const newHist=[...allHist,{phaseId:phase.id,phaseTitle:phase.title,decisions:phaseDecisions,checkpoint:cp,phaseScore,maxPhaseScore:maxPS}];
+      setCheckpoint(cp);setXp(newXP);setCompleted(newCompleted);setAllHist(newHist);
+      save({xp:newXP,completed:newCompleted,allHist:newHist});setScreen("checkpoint");
+    }else{
+      const nextSlot=slotIdx+1;
+      setSlotIdx(nextSlot);
+      setCurDecision(buildDecision(CONTENT[phase.id].slots[nextSlot]));
+      setScreen("decision");
+    }
+  };
+
+  const handleNextPhase=()=>{
+    if(phaseIdx<PHASES.length-1){
+      const next=phaseIdx+1;setPhaseIdx(next);save({phaseIdx:next});setScreen("phaseIntro");
+    }else{
+      setCloseout(buildCloseout(allHist,totalDS,maxDS));
+      setScreen("closeout");
+    }
+  };
+
+  const resetAll=()=>{
+    try{ localStorage.removeItem(SAVE_KEY); }catch{}
+    setPhaseIdx(0);setCompleted([]);setXp(0);setTotalDS(0);setMaxDS(0);
+    setRels({calhoun:50,vivian:50,tyler:50,rena:50,diaz:50});
+    setAllHist([]);setLog([]);setOpener(null);setCurDecision(null);
+    setLastOutcome(null);setCheckpoint(null);setCloseout(null);
+    setPhaseScore(0);setDecCount(0);setSlotIdx(0);setScreen("splash");
+  };
+
+  const Header=()=>(
+    <div style={{marginBottom:16}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+        <div>
+          <div style={{fontSize:13,color:phase.color,fontWeight:800,fontFamily:"system-ui"}}>{phase.title}</div>
+          <div style={{fontSize:10,color:C.textMuted,fontFamily:"system-ui",marginTop:1}}>{SCENARIO.learner} · {SCENARIO.district} · Phase {phase.n}/{PHASES.length}</div>
+        </div>
+        <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end"}}>
+          <Btn small variant="ghost" onClick={()=>setShowLog(!showLog)}>📋 {showLog?"Hide":"Log"}</Btn>
+          <Btn small variant="outline" onClick={()=>{save();setScreen("saved");}}>Save & Exit</Btn>
+          <Btn small variant="ghost" onClick={()=>{save();setScreen("splash");}}>🏠</Btn>
+        </div>
+      </div>
+      <PhaseBar currentId={phase.id} completed={completed}/>
+      <div style={{height:5,background:C.bgLight,borderRadius:3,overflow:"hidden",marginBottom:4}}>
+        <div style={{width:`${Math.min(100,(totalDS/TOTAL_MAX_DECISION_SCORE)*100)}%`,height:"100%",background:phase.color,borderRadius:3,transition:"width 0.6s ease"}}/>
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between"}}>
+        <span style={{fontSize:10,color:C.textMuted,fontFamily:"system-ui"}}>Decision {decCount}/{phase.maxDecisions} · Phase: {phaseScore}/{maxPS}pts</span>
+        <span style={{fontSize:10,color:phase.color,fontFamily:"system-ui",fontWeight:700}}>Total: {totalDS}/{maxDS}pts</span>
+      </div>
+    </div>
+  );
+
+  const LogPanel=()=>(
+    <Card style={{marginBottom:12,maxHeight:220,overflowY:"auto"}}>
+      <div style={{fontSize:11,color:C.textMuted,fontFamily:"system-ui",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8}}>📋 Project Decision Log</div>
+      {log.length===0?<p style={{color:C.textMuted,fontSize:12,fontFamily:"system-ui"}}>No decisions yet.</p>:
+      [...log].reverse().map((e,i)=>(
+        <div key={i} style={{borderBottom:`1px solid ${C.bgLight}`,paddingBottom:8,marginBottom:8}}>
+          <div style={{fontSize:9,color:phase.color,fontFamily:"system-ui",fontWeight:700,marginBottom:1,textTransform:"uppercase"}}>{e.phase}</div>
+          <div style={{fontSize:11,color:C.textMid,fontFamily:"system-ui",marginBottom:2,fontStyle:"italic"}}>{e.decision}</div>
+          <div style={{fontSize:11,color:C.green,fontFamily:"system-ui",marginBottom:2}}>✓ {e.chose} · {e.weight}pts</div>
+          <div style={{fontSize:11,color:C.text,fontFamily:"system-ui",marginBottom:3,lineHeight:1.4}}>{e.outcome}</div>
+          {e.pmTerm&&<Pill label={e.pmTerm} color={phase.color}/>}
+        </div>
+      ))}
+    </Card>
+  );
+
+  // ── SPLASH ──
+  if(screen==="splash") return(
+    <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px 16px",fontFamily:"Georgia,serif"}}>
+      <div style={{maxWidth:440,width:"100%"}}>
+        <div style={{textAlign:"center",marginBottom:20}}>
+          <div style={{fontSize:48,marginBottom:10}}>🎓</div>
+          <div style={{fontSize:9,letterSpacing:"0.4em",color:C.textMuted,textTransform:"uppercase",marginBottom:10,fontFamily:"system-ui"}}>CAPM/PM Journey · Training Simulation</div>
+          <div style={{fontSize:10,letterSpacing:"0.2em",color:C.textMid,textTransform:"uppercase",marginBottom:6,fontFamily:"system-ui"}}>{SCENARIO.district}</div>
+          <h1 style={{fontSize:32,fontWeight:900,color:C.text,margin:"0 0 8px",lineHeight:1.1,letterSpacing:"-0.02em"}}>Classroom of<br/>the <span style={{color:C.blue}}>Future</span></h1>
+          <div style={{fontSize:15,fontWeight:800,color:C.text,fontFamily:"system-ui",marginTop:8,letterSpacing:"0.02em"}}>{SCENARIO.learner}</div>
+          <div style={{width:24,height:2,background:C.blue,margin:"12px auto",borderRadius:2}}/>
+        </div>
+        <Card style={{marginBottom:14}}>
+          <p style={{color:C.textMid,fontSize:13,lineHeight:1.9,margin:0,fontFamily:"system-ui"}}>
+            As the Project Manager, you are fully responsible for the outcome of this initiative — regardless of what others do or don't do. You'll face skeptics, budget realities, and the constant pull of scope creep. Navigating, unblocking, and escalating them is your responsibility.<br/><br/>
+            The good news? <strong style={{color:C.text}}>You have everything you need to succeed.</strong>
+          </p>
+        </Card>
+        <Btn full onClick={()=>setScreen("overview")} color={C.blue}>Begin Simulation →</Btn>
+        {loadSave()&&(
+          <div style={{marginTop:10}}>
+            <button onClick={()=>{const s=loadSave();if(s){setPhaseIdx(s.phaseIdx||0);setCompleted(s.completed||[]);setXp(cap(s.xp||0,9999));setTotalDS(s.totalDS||0);setMaxDS(s.maxDS||0);setRels(s.rels||{calhoun:50,vivian:50,tyler:50,rena:50,diaz:50});setAllHist(s.allHist||[]);setLog(s.log||[]);setScreen("phaseIntro");}}}
+              style={{width:"100%",background:C.blueLight,border:`1.5px solid ${C.blueBorder}`,borderRadius:10,padding:"12px",fontSize:14,fontWeight:700,color:C.blue,cursor:"pointer",fontFamily:"system-ui"}}>
+              ↩ Welcome Back, {SCENARIO.learner.split(" ")[0]} — Resume Your Progress
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ── OVERVIEW ──
+  if(screen==="overview") return(
+    <div style={{minHeight:"100vh",background:C.bg,padding:"24px 16px",fontFamily:"Georgia,serif"}}>
+      <div style={{maxWidth:520,margin:"0 auto"}}>
+        <Btn variant="ghost" onClick={()=>setScreen("splash")}>← Back</Btn>
+        <div style={{textAlign:"center",margin:"12px 0 16px"}}>
+          <div style={{fontSize:40,marginBottom:8}}>🎓</div>
+          <div style={{fontSize:10,color:C.blue,letterSpacing:"0.3em",textTransform:"uppercase",marginBottom:6,fontFamily:"system-ui",fontWeight:700}}>{SCENARIO.district}</div>
+          <h2 style={{fontSize:20,fontWeight:900,color:C.text,margin:"0 0 8px",lineHeight:1.2}}>Classroom of the Future<br/>Project</h2>
+          <p style={{color:C.textMid,fontSize:13,lineHeight:1.8,margin:0,fontFamily:"system-ui"}}>Superintendent Calhoun has named you PM of a 90-day initiative. Students engage with the world differently now — and he wants classrooms designed to meet them where they are. Your job: define it, pilot it, and bring the board a plan.</p>
+        </div>
+        <Card style={{marginBottom:12,background:C.goldLight,border:`1px solid ${C.goldBorder}`}}>
+          <div style={{display:"flex",gap:10,alignItems:"center"}}>
+            <span style={{fontSize:24}}>🏆</span>
+            <div>
+              <div style={{fontSize:11,color:C.gold,fontFamily:"system-ui",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:2}}>PM Achievement Certificate</div>
+              <div style={{fontSize:12,color:"#78350F",fontFamily:"system-ui",lineHeight:1.5}}>Score 90% or higher to earn your Project Manager Certificate. Every decision is scored. How you lead determines what you earn.</div>
+            </div>
+          </div>
+        </Card>
+        <Card style={{marginBottom:12}}>
+          <div style={{fontSize:11,color:C.textMuted,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10,fontFamily:"system-ui"}}>Your Stakeholders</div>
+          {Object.entries(CHARS).map(([k,c])=>(
+            <div key={k} style={{display:"flex",gap:10,alignItems:"center",padding:"7px 0",borderBottom:`1px solid ${C.bgLight}`}}>
+              <Avatar char={k} size={32}/>
+              <div>
+                <div style={{fontSize:13,color:C.text,fontWeight:700,fontFamily:"system-ui"}}>{c.name}</div>
+                <div style={{fontSize:11,color:C.textMuted,fontFamily:"system-ui"}}>{c.role}</div>
+              </div>
+            </div>
+          ))}
+        </Card>
+        <Card style={{marginBottom:14}}>
+          <div style={{fontSize:11,color:C.textMuted,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12,fontFamily:"system-ui"}}>The 5 Project Management Phases</div>
+          {PHASES.map(p=>(
+            <div key={p.id} style={{display:"flex",gap:10,alignItems:"flex-start",padding:"9px 0",borderBottom:`1px solid ${C.bgLight}`}}>
+              <div style={{width:34,height:34,borderRadius:8,background:p.bg,border:`1.5px solid ${p.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>{p.icon}</div>
+              <div style={{flex:1}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:6}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,color:C.text,fontWeight:700,fontFamily:"system-ui"}}>{p.title}</div>
+                    <div style={{fontSize:10,color:p.color,fontFamily:"system-ui",fontStyle:"italic",marginBottom:2}}>{p.pmbok}</div>
+                    <div style={{fontSize:12,color:C.textMid,fontFamily:"system-ui",lineHeight:1.5}}>{p.purpose}</div>
+                  </div>
+                  <span style={{fontSize:9,color:p.color,background:p.bg,padding:"2px 6px",borderRadius:10,border:`1px solid ${p.color}33`,whiteSpace:"nowrap",flexShrink:0,fontFamily:"system-ui"}}>{p.minutes}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </Card>
+        <Btn full onClick={()=>setScreen("login")} color={C.blue}>I'm Ready →</Btn>
+      </div>
+    </div>
+  );
+
+  // ── LOGIN ──
+  if(screen==="login") return(
+    <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px 16px"}}>
+      <div style={{maxWidth:340,width:"100%",fontFamily:"Georgia,serif"}}>
+        <Btn variant="ghost" onClick={()=>setScreen("overview")}>← Back</Btn>
+        <div style={{margin:"16px 0"}}>
+          <h2 style={{color:C.text,fontSize:24,fontWeight:900,margin:"0 0 6px"}}>Welcome.</h2>
+          <p style={{color:C.textMid,fontSize:13,margin:0,fontFamily:"system-ui"}}>Enter your name to begin your CAPM/PM journey.</p>
+        </div>
+        <input value={loginInput} onChange={e=>{setLoginInput(e.target.value);setLoginErr("");}}
+          onKeyDown={e=>{if(e.key==="Enter"){if(loginInput.trim().toLowerCase()==="garius"){setLoginErr("");setScreen("phaseIntro");}else setLoginErr("This simulation was built for Garius Edmond.");}}}
+          placeholder="Your name..." autoFocus
+          style={{width:"100%",padding:"12px 14px",background:C.bgCard,border:`1.5px solid ${loginErr?C.red:C.border}`,borderRadius:10,color:C.text,fontSize:15,fontFamily:"system-ui",outline:"none",marginBottom:8}}/>
+        {loginErr&&<p style={{color:C.red,fontSize:12,marginBottom:8,fontFamily:"system-ui"}}>{loginErr}</p>}
+        <Btn full onClick={()=>{if(loginInput.trim().toLowerCase()==="garius"){setLoginErr("");setScreen("phaseIntro");}else setLoginErr("This simulation was built for Garius Edmond.");}} color={C.blue}>Enter →</Btn>
+      </div>
+    </div>
+  );
+
+  // ── SAVED ──
+  if(screen==="saved") return(
+    <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12,padding:24}}>
+      <div style={{fontSize:40}}>💾</div>
+      <h2 style={{color:C.text,fontSize:20,fontWeight:900,margin:0,fontFamily:"Georgia,serif"}}>Progress Saved</h2>
+      <p style={{color:C.textMid,fontSize:13,textAlign:"center",maxWidth:280,lineHeight:1.65,fontFamily:"system-ui"}}>You're in Phase {phase.n}: {phase.title}. Come back anytime — your progress will be right here, {SCENARIO.learner.split(" ")[0]}.</p>
+      <Btn onClick={()=>setScreen("splash")} color={C.blue}>Back to Home</Btn>
+    </div>
+  );
+
+  // ── PHASE INTRO ──
+  if(screen==="phaseIntro") return(
+    <div style={{minHeight:"100vh",background:C.bg,padding:"24px 16px",fontFamily:"Georgia,serif"}}>
+      <div style={{maxWidth:480,margin:"0 auto"}}>
+        <PhaseBar currentId={phase.id} completed={completed}/>
+        <div style={{textAlign:"center",marginBottom:16}}>
+          <div style={{fontSize:42,marginBottom:8}}>{phase.icon}</div>
+          <div style={{fontSize:10,color:phase.color,letterSpacing:"0.3em",textTransform:"uppercase",marginBottom:4,fontFamily:"system-ui",fontWeight:700}}>Phase {phase.n} of {PHASES.length}</div>
+          <h2 style={{fontSize:21,fontWeight:900,color:C.text,margin:"0 0 2px",lineHeight:1.2}}>{phase.title}</h2>
+          <div style={{fontSize:10,color:phase.color,fontFamily:"system-ui",fontStyle:"italic"}}>{phase.pmbok}</div>
+        </div>
+        {phase.n===1&&(
+          <Card style={{marginBottom:12,background:C.blueLight,border:`1.5px solid ${C.blueBorder}`}}>
+            <p style={{color:"#1E40AF",fontSize:13,lineHeight:1.9,margin:0,fontFamily:"system-ui"}}>
+              Garius, this simulation puts you in the lead seat of a real project — with real decisions and real trade-offs. There are no trick questions, only choices that matter. <strong>Mistakes along the way are not failure here, but leadership learning opportunities.</strong> Your goal is to think, lead, and decide like a project manager.
+            </p>
+          </Card>
+        )}
+        <Card style={{marginBottom:12,background:phase.bg,border:`1.5px solid ${phase.color}33`}}>
+          <div style={{fontSize:10,color:phase.color,fontFamily:"system-ui",fontWeight:700,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.1em"}}>What This Phase Is About</div>
+          <p style={{color:C.textMid,fontSize:13,lineHeight:1.7,margin:"0 0 10px",fontFamily:"system-ui"}}>{phase.purpose}</p>
+          <div style={{fontSize:11,color:C.textMuted,fontFamily:"system-ui",marginBottom:4}}>{phase.maxDecisions} decisions · {phase.minutes} · Up to {maxPS} pts this phase</div>
+          <div style={{fontSize:11,color:phase.color,fontFamily:"system-ui",fontWeight:600}}>Each decision: 0, 1, or 2 points based on your choice</div>
+        </Card>
+        {phase.n>1&&(
+          <div style={{background:C.goldLight,border:`1px solid ${C.goldBorder}`,borderRadius:10,padding:"8px 12px",marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{fontSize:12,color:"#78350F",fontFamily:"system-ui"}}>🏆 PM Certificate at 90%</span>
+            <span style={{fontSize:12,color:C.gold,fontFamily:"system-ui",fontWeight:700}}>{maxDS>0?Math.round((totalDS/maxDS)*100):0}% so far</span>
+          </div>
+        )}
+        <Btn full onClick={startPhase} color={phase.color}>
+          {phase.n===1?"Start the Project →":`Begin Phase ${phase.n} →`}
+        </Btn>
+      </div>
+    </div>
+  );
+
+  // ── DECISION ──
+  if(screen==="decision"&&opener&&curDecision) return(
+    <div style={{minHeight:"100vh",background:C.bg,padding:"24px 16px",fontFamily:"Georgia,serif"}}>
+      <div style={{maxWidth:520,margin:"0 auto"}}>
+        <Header/>
+        {showLog&&<LogPanel/>}
+        <Card style={{marginBottom:10,opacity:0.78,background:C.bgLight}}>
+          <p style={{color:C.textMid,fontSize:12,lineHeight:1.7,margin:0,fontFamily:"system-ui"}}>{opener.scene}</p>
+        </Card>
+        <div style={{display:"flex",gap:10,alignItems:"flex-start",background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:12,padding:12,marginBottom:14,opacity:0.85}}>
+          <Avatar char={opener.speaker} size={36}/>
+          <div style={{flex:1}}>
+            <div style={{fontSize:10,color:CHARS[opener.speaker]?.color||C.blue,fontWeight:700,marginBottom:4,fontFamily:"system-ui"}}>{CHARS[opener.speaker]?.name} · {CHARS[opener.speaker]?.role}</div>
+            <p style={{color:C.text,fontSize:13,lineHeight:1.7,margin:0,fontStyle:"italic",fontFamily:"system-ui"}}>"{opener.dialogue}"</p>
+          </div>
+        </div>
+        <div style={{background:phase.bg,border:`2.5px solid ${phase.color}66`,borderRadius:12,padding:"14px 16px",marginBottom:14}}>
+          <div style={{fontSize:10,color:phase.color,letterSpacing:"0.25em",textTransform:"uppercase",marginBottom:8,fontFamily:"system-ui",fontWeight:800}}>Your Decision</div>
+          <p style={{color:C.text,fontSize:16,lineHeight:1.6,margin:0,fontWeight:800,fontFamily:"system-ui"}}>{curDecision.prompt}</p>
+        </div>
+        {curDecision.choices.map(c=><ChoiceCard key={c.id} choice={c} onSelect={handleChoice} disabled={false} color={phase.color}/>)}
+        {opener.pmConcept&&(
+          <div style={{marginTop:8,padding:"6px 12px",background:C.bgLight,borderRadius:8,border:`1px dashed ${C.border}`}}>
+            <span style={{fontSize:10,color:C.textMuted,fontFamily:"system-ui"}}>PM concept in focus: </span>
+            <span style={{fontSize:10,color:phase.color,fontWeight:700,fontFamily:"system-ui"}}>{opener.pmConcept}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ── OUTCOME ──
+  if(screen==="outcome"&&lastOutcome) return(
+    <div style={{minHeight:"100vh",background:C.bg,padding:"24px 16px",fontFamily:"Georgia,serif"}}>
+      <div style={{maxWidth:520,margin:"0 auto"}}>
+        <Header/>
+        {showLog&&<LogPanel/>}
+        <Card style={{marginBottom:10,borderLeft:`4px solid ${phase.color}`}}>
+          <div style={{fontSize:10,color:phase.color,letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:7,fontFamily:"system-ui",fontWeight:700}}>What Happened</div>
+          <p style={{color:C.text,fontSize:13,lineHeight:1.75,margin:0,fontFamily:"system-ui"}}>{lastOutcome.outcome}</p>
+        </Card>
+        {lastOutcome.reaction&&(
+          <div style={{display:"flex",gap:10,alignItems:"flex-start",background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:12,padding:12,marginBottom:10}}>
+            <Avatar char={lastOutcome.speaker} size={32}/>
+            <div>
+              <div style={{fontSize:10,color:CHARS[lastOutcome.speaker]?.color||C.blue,fontWeight:700,marginBottom:3,fontFamily:"system-ui"}}>{CHARS[lastOutcome.speaker]?.name}</div>
+              <p style={{color:C.textMid,fontSize:13,lineHeight:1.65,margin:0,fontStyle:"italic",fontFamily:"system-ui"}}>"{lastOutcome.reaction}"</p>
+            </div>
+          </div>
+        )}
+        <Card style={{marginBottom:10,background:C.greenLight,border:`1px solid ${C.greenBorder}`}}>
+          <div style={{fontSize:10,color:C.green,letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:7,fontFamily:"system-ui",fontWeight:700}}>Coach's Note</div>
+          <p style={{color:"#14532D",fontSize:13,lineHeight:1.75,margin:"0 0 8px",fontFamily:"system-ui"}}>{lastOutcome.coaching}</p>
+          {lastOutcome.pmTerm&&<Pill label={lastOutcome.pmTerm} color={C.green}/>}
+        </Card>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <span style={{fontSize:12,color:C.green,fontFamily:"system-ui",fontWeight:600}}>+{lastOutcome.xp} XP</span>
+          <span style={{fontSize:12,color:phase.color,fontFamily:"system-ui",fontWeight:600}}>Decision: {lastOutcome.score}/2 pts</span>
+        </div>
+        {lastOutcome.phaseComplete&&(
+          <Card style={{marginBottom:12,background:phase.bg,border:`2.5px solid ${phase.color}`,textAlign:"center",padding:"14px"}}>
+            <div style={{fontSize:22,marginBottom:5}}>{phase.icon}</div>
+            <div style={{fontSize:14,color:phase.color,fontWeight:900,fontFamily:"system-ui",letterSpacing:"0.05em",marginBottom:2}}>PHASE {phase.n} COMPLETE</div>
+            <div style={{fontSize:11,color:C.textMid,fontFamily:"system-ui"}}>{phase.title} · Gate Passed ✓</div>
+          </Card>
+        )}
+        <Btn full onClick={handleContinue} color={phase.color}>
+          {lastOutcome.phaseComplete?"See Phase Summary →":"Continue →"}
+        </Btn>
+      </div>
+    </div>
+  );
+
+  // ── CHECKPOINT ──
+  if(screen==="checkpoint"&&checkpoint) return(
+    <div style={{minHeight:"100vh",background:C.bg,padding:"24px 16px",fontFamily:"Georgia,serif"}}>
+      <div style={{maxWidth:480,margin:"0 auto"}}>
+        <div style={{textAlign:"center",marginBottom:16}}>
+          <div style={{fontSize:44,marginBottom:8}}>{phase.icon}</div>
+          <div style={{fontSize:10,color:phase.color,letterSpacing:"0.3em",textTransform:"uppercase",marginBottom:4,fontFamily:"system-ui",fontWeight:700}}>Phase {phase.n} Gate — Passed ✓</div>
+          <h2 style={{fontSize:20,fontWeight:900,color:C.text,margin:0,lineHeight:1.3}}>{checkpoint.headline}</h2>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+          <ScoreBox score={phaseScore} max={maxPS} label={`Phase ${phase.n} Score`}/>
+          <ScoreBox score={totalDS} max={maxDS||1} label="Overall Score" color={C.blue}/>
+        </div>
+        {maxDS>0&&(()=>{
+          const cert=getCertLevel(totalDS,maxDS);
+          return(
+            <div style={{background:C.goldLight,border:`1px solid ${C.goldBorder}`,borderRadius:10,padding:"8px 14px",marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{fontSize:10,color:C.gold,fontFamily:"system-ui",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em"}}>Current Standing</div>
+                <div style={{fontSize:13,color:"#78350F",fontFamily:"system-ui",fontWeight:700}}>{cert.label} · {cert.pct}%</div>
+              </div>
+              <div style={{fontSize:11,color:C.gold,fontFamily:"system-ui",textAlign:"right"}}>🏆 90% for<br/>Certificate</div>
+            </div>
+          );
+        })()}
+        <Card style={{marginBottom:12}}>
+          <p style={{color:C.textMid,fontSize:13,lineHeight:1.75,margin:"0 0 12px",fontFamily:"system-ui"}}>{checkpoint.summary}</p>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
+            <div style={{background:C.greenLight,border:`1px solid ${C.greenBorder}`,borderRadius:10,padding:10}}>
+              <div style={{fontSize:9,color:C.green,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4,fontFamily:"system-ui",fontWeight:700}}>What You Did Well</div>
+              <p style={{color:"#14532D",fontSize:12,lineHeight:1.55,margin:0,fontFamily:"system-ui"}}>{checkpoint.strength}</p>
+            </div>
+            <div style={{background:C.amberLight,border:`1px solid ${C.amberBorder}`,borderRadius:10,padding:10}}>
+              <div style={{fontSize:9,color:C.amber,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4,fontFamily:"system-ui",fontWeight:700}}>To Sharpen</div>
+              <p style={{color:"#78350F",fontSize:12,lineHeight:1.55,margin:0,fontFamily:"system-ui"}}>{checkpoint.sharpen}</p>
+            </div>
+          </div>
+          <div style={{background:C.blueLight,border:`1px solid ${C.blueBorder}`,borderRadius:10,padding:10,marginBottom:10}}>
+            <div style={{fontSize:9,color:C.blue,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4,fontFamily:"system-ui",fontWeight:700}}>PM Lesson</div>
+            <p style={{color:"#1E40AF",fontSize:13,lineHeight:1.65,margin:0,fontFamily:"system-ui"}}>{checkpoint.pmLesson}</p>
+          </div>
+          <div style={{borderTop:`1px solid ${C.bgLight}`,paddingTop:10,textAlign:"center"}}>
+            <p style={{color:C.text,fontSize:13,fontWeight:700,margin:0,lineHeight:1.6,fontFamily:"system-ui"}}>{checkpoint.motivational}</p>
+          </div>
+        </Card>
+        <Btn full onClick={handleNextPhase} color={phaseIdx<PHASES.length-1?PHASES[phaseIdx+1].color:C.gold}>
+          {phaseIdx<PHASES.length-1?`Enter Phase ${phaseIdx+2}: ${PHASES[phaseIdx+1].title} →`:"Close Out the Project →"}
+        </Btn>
+      </div>
+    </div>
+  );
+
+  // ── CLOSEOUT ──
+  if(screen==="closeout"&&closeout){
+    const cert=getCertLevel(totalDS,maxDS||1);
+    return(
+      <div style={{minHeight:"100vh",background:C.bg,padding:"24px 16px",fontFamily:"Georgia,serif"}}>
+        <div style={{maxWidth:520,margin:"0 auto"}}>
+          <div style={{textAlign:"center",marginBottom:16}}>
+            <div style={{fontSize:40,marginBottom:8}}>🎓</div>
+            <div style={{fontSize:10,color:C.gold,letterSpacing:"0.3em",textTransform:"uppercase",marginBottom:6,fontFamily:"system-ui",fontWeight:700}}>Project Complete — {SCENARIO.district}</div>
+            <h2 style={{fontSize:20,fontWeight:900,color:C.text,margin:"0 0 4px",lineHeight:1.2}}>{closeout.headline}</h2>
+          </div>
+          <CertificateBadge cert={cert} score={totalDS} max={maxDS||1}/>
+          {closeout.deliverables&&(
+            <Card style={{marginBottom:12}}>
+              <div style={{fontSize:11,color:C.textMuted,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4,fontFamily:"system-ui"}}>Your Deliverables</div>
+              <div style={{fontSize:10,color:C.textMuted,fontFamily:"system-ui",marginBottom:10,fontStyle:"italic"}}>Calhoun's 3 Requirements — Results</div>
+              {closeout.deliverables.map((d,i)=><DeliverableRow key={i} {...d}/>)}
+            </Card>
+          )}
+          <div style={{display:"flex",gap:10,alignItems:"flex-start",background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:12,padding:14,marginBottom:10}}>
+            <Avatar char="calhoun" size={38}/>
+            <div>
+              <div style={{fontSize:10,color:CHARS.calhoun.color,fontWeight:700,marginBottom:4,fontFamily:"system-ui"}}>Dr. Marcus Calhoun · Final Debrief</div>
+              <p style={{color:C.text,fontSize:13,lineHeight:1.75,margin:"0 0 6px",fontFamily:"system-ui"}}>"{closeout.marcusDebrief}"</p>
+              <p style={{color:C.textMid,fontSize:12,lineHeight:1.65,margin:0,fontStyle:"italic",fontFamily:"system-ui"}}>"{closeout.marcusFinal}"</p>
+            </div>
+          </div>
+          <Card style={{marginBottom:10}}>
+            <div style={{fontSize:11,color:C.textMuted,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:10,fontFamily:"system-ui"}}>Stakeholder Reactions</div>
+            {[["vivian",closeout.vivianReaction],["diaz",closeout.diazReaction],["tyler",closeout.tylerReaction],["rena",closeout.renaReaction]].map(([k,r])=>(
+              <div key={k} style={{display:"flex",gap:8,alignItems:"flex-start",marginBottom:10}}>
+                <Avatar char={k} size={30}/>
+                <div>
+                  <div style={{fontSize:10,color:CHARS[k]?.color,fontWeight:700,fontFamily:"system-ui",marginBottom:2}}>{CHARS[k]?.name}</div>
+                  <p style={{color:C.textMid,fontSize:12,lineHeight:1.6,margin:0,fontStyle:"italic",fontFamily:"system-ui"}}>"{r}"</p>
+                </div>
+              </div>
+            ))}
+          </Card>
+          <Card style={{marginBottom:10}}>
+            <div style={{fontSize:11,color:C.textMuted,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:10,fontFamily:"system-ui"}}>What You Learned — Phase by Phase</div>
+            {closeout.phaseRecaps.map((r,i)=>(
+              <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"7px 0",borderBottom:`1px solid ${C.bgLight}`}}>
+                <span style={{fontSize:14,flexShrink:0}}>{PHASES[i]?.icon}</span>
+                <div style={{flex:1}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:2,gap:4}}>
+                    <div style={{fontSize:12,color:C.text,fontWeight:700,fontFamily:"system-ui"}}>{r.phase}</div>
+                    <Pill label={r.pmTerm} color={PHASES[i]?.color||C.blue}/>
+                  </div>
+                  <div style={{fontSize:11,color:C.textMid,fontFamily:"system-ui",lineHeight:1.5}}>{r.lesson}</div>
+                </div>
+              </div>
+            ))}
+          </Card>
+          <Card style={{marginBottom:14,background:cert.pct>=90?C.goldLight:C.greenLight,border:`1px solid ${cert.pct>=90?C.goldBorder:C.greenBorder}`}}>
+            <p style={{color:cert.pct>=90?"#78350F":"#14532D",fontSize:13,lineHeight:1.8,margin:0,fontFamily:"system-ui",fontStyle:"italic",textAlign:"center"}}>"{closeout.finalMessage}"</p>
+          </Card>
+          <Btn full onClick={resetAll} variant="outline">Run It Again →</Btn>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
